@@ -1,0 +1,86 @@
+[world]
+kind = "WorldContract"
+class_hash = "0x6f4515274ee23404789c3351a77107d0ec07508530119822046600ca6948d6e"
+original_class_hash = "0x6f4515274ee23404789c3351a77107d0ec07508530119822046600ca6948d6e"
+abi = "manifests/dev/deployment/abis/dojo-world.json"
+address = "0x611ff61e3381fcab007822cddc4ab3c68983b1450cc61e37eefbbf7699e116d"
+transaction_hash = "0x4e28bed67790065908bd73ea2ea016ec8e2fd6fda6c48685b9d03be97def003"
+block_number = 17
+seed = "overdrive"
+manifest_name = "dojo-world"
+
+[world.metadata]
+profile_name = "dev"
+rpc_url = "http://localhost:5050/"
+
+[base]
+kind = "Class"
+class_hash = "0x2427dd10a58850ac9a5ca6ce04b7771b05330fd18f2e481831ad903b969e6b2"
+original_class_hash = "0x2427dd10a58850ac9a5ca6ce04b7771b05330fd18f2e481831ad903b969e6b2"
+abi = "manifests/dev/deployment/abis/dojo-base.json"
+tag = "dojo-base"
+manifest_name = "dojo-base"
+
+[[contracts]]
+kind = "DojoContract"
+address = "0x27b2eafa764cb28435cc57798b3f1859258e28d3eb496e46098f5df2bedb2a8"
+class_hash = "0x510608cdd6b54532d03490ba568c1e17816c3785d2e53eff7d1cd24be93aa99"
+original_class_hash = "0x510608cdd6b54532d03490ba568c1e17816c3785d2e53eff7d1cd24be93aa99"
+base_class_hash = "0x2427dd10a58850ac9a5ca6ce04b7771b05330fd18f2e481831ad903b969e6b2"
+abi = "manifests/dev/deployment/abis/contracts/overdrive-playerActions-3f98d0d2.json"
+reads = []
+writes = [
+    "overdrive-Garage",
+    "overdrive-Statistics",
+]
+init_calldata = []
+tag = "overdrive-playerActions"
+systems = [
+    "create_account",
+    "get_account",
+    "add_win",
+]
+manifest_name = "overdrive-playerActions-3f98d0d2"
+
+[[models]]
+kind = "DojoModel"
+class_hash = "0x4cbab47929f8f3ccf9deca59a40b668dff129c6e21b78563d8ed663d52770a8"
+original_class_hash = "0x4cbab47929f8f3ccf9deca59a40b668dff129c6e21b78563d8ed663d52770a8"
+abi = "manifests/dev/deployment/abis/models/overdrive-Garage-376ec3a2.json"
+tag = "overdrive-Garage"
+qualified_path = "overdrive::models::player_models::garage"
+manifest_name = "overdrive-Garage-376ec3a2"
+
+[[models.members]]
+name = "player"
+type = "ContractAddress"
+key = true
+
+[[models.members]]
+name = "cars"
+type = "u32"
+key = false
+
+[[models]]
+kind = "DojoModel"
+class_hash = "0x27858b7abc321a7945d1791a649ac6817a9307b3250420a107a36bb8b58ceac"
+original_class_hash = "0x27858b7abc321a7945d1791a649ac6817a9307b3250420a107a36bb8b58ceac"
+abi = "manifests/dev/deployment/abis/models/overdrive-Statistics-752811ea.json"
+tag = "overdrive-Statistics"
+qualified_path = "overdrive::models::player_models::statistics"
+manifest_name = "overdrive-Statistics-752811ea"
+
+[[models.members]]
+name = "player"
+type = "ContractAddress"
+key = true
+
+[[models.members]]
+name = "wins"
+type = "u8"
+key = false
+
+[[models.members]]
+name = "elo"
+type = "u32"
+key = false

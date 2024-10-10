@@ -128,55 +128,31 @@
   },
   {
     "type": "impl",
-    "name": "ActionsImpl",
-    "interface_name": "dojo_starter::systems::actions::IActions"
-  },
-  {
-    "type": "enum",
-    "name": "dojo_starter::models::Direction",
-    "variants": [
-      {
-        "name": "None",
-        "type": "()"
-      },
-      {
-        "name": "Left",
-        "type": "()"
-      },
-      {
-        "name": "Right",
-        "type": "()"
-      },
-      {
-        "name": "Up",
-        "type": "()"
-      },
-      {
-        "name": "Down",
-        "type": "()"
-      }
-    ]
+    "name": "PlayerActionsImpl",
+    "interface_name": "overdrive::systems::player_actions::IPlayerActions"
   },
   {
     "type": "interface",
-    "name": "dojo_starter::systems::actions::IActions",
+    "name": "overdrive::systems::player_actions::IPlayerActions",
     "items": [
       {
         "type": "function",
-        "name": "spawn",
+        "name": "create_account",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
         "type": "function",
-        "name": "move",
-        "inputs": [
-          {
-            "name": "direction",
-            "type": "dojo_starter::models::Direction"
-          }
-        ],
+        "name": "get_account",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "add_win",
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       }
@@ -185,11 +161,11 @@
   {
     "type": "impl",
     "name": "IDojoInitImpl",
-    "interface_name": "dojo_starter::systems::actions::actions::IDojoInit"
+    "interface_name": "overdrive::systems::player_actions::playerActions::IDojoInit"
   },
   {
     "type": "interface",
-    "name": "dojo_starter::systems::actions::actions::IDojoInit",
+    "name": "overdrive::systems::player_actions::playerActions::IDojoInit",
     "items": [
       {
         "type": "function",
@@ -249,7 +225,7 @@
   },
   {
     "type": "event",
-    "name": "dojo_starter::systems::actions::actions::Event",
+    "name": "overdrive::systems::player_actions::playerActions::Event",
     "kind": "enum",
     "variants": [
       {

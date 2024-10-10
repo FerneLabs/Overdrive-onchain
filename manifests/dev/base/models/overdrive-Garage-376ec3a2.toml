@@ -1,0 +1,17 @@
+kind = "DojoModel"
+class_hash = "0x4cbab47929f8f3ccf9deca59a40b668dff129c6e21b78563d8ed663d52770a8"
+original_class_hash = "0x4cbab47929f8f3ccf9deca59a40b668dff129c6e21b78563d8ed663d52770a8"
+abi = "manifests/dev/base/abis/models/overdrive-Garage-376ec3a2.json"
+tag = "overdrive-Garage"
+qualified_path = "overdrive::models::player_models::garage"
+manifest_name = "overdrive-Garage-376ec3a2"
+
+[[members]]
+name = "player"
+type = "ContractAddress"
+key = true
+
+[[members]]
+name = "cars"
+type = "u32"
+key = false

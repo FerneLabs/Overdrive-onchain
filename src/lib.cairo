@@ -1,9 +1,12 @@
 mod systems {
-    mod actions;
+    mod player_actions;
 }
 
-mod models;
+mod models {
+    mod player_models;
+}
 
 mod tests {
     mod test_world;
 }
+
