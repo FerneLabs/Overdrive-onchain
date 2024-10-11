@@ -138,20 +138,18 @@
       {
         "type": "function",
         "name": "create_account",
-        "inputs": [],
+        "inputs": [
+          {
+            "name": "username",
+            "type": "core::felt252"
+          }
+        ],
         "outputs": [],
         "state_mutability": "external"
       },
       {
         "type": "function",
         "name": "get_account",
-        "inputs": [],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "add_win",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"

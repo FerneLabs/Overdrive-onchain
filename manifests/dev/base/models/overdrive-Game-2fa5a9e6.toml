@@ -1,0 +1,27 @@
+kind = "DojoModel"
+class_hash = "0x604cf0100b50908a6d9fee20eaeeb0544c8be6fd1e84f29b037e1df13b791a6"
+original_class_hash = "0x604cf0100b50908a6d9fee20eaeeb0544c8be6fd1e84f29b037e1df13b791a6"
+abi = "manifests/dev/base/abis/models/overdrive-Game-2fa5a9e6.json"
+tag = "overdrive-Game"
+qualified_path = "overdrive::models::game_models::game"
+manifest_name = "overdrive-Game-2fa5a9e6"
+
+[[members]]
+name = "id"
+type = "felt252"
+key = true
+
+[[members]]
+name = "created_by"
+type = "ContractAddress"
+key = false
+
+[[members]]
+name = "game_status"
+type = "GameStatus"
+key = false
+
+[[members]]
+name = "game_mode"
+type = "GameMode"
+key = false

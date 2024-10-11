@@ -1,0 +1,15 @@
+kind = "DojoContract"
+class_hash = "0x3227a421c1e9822b0966f7d5505f189bd12dc3133faab983a5d42ae35c3c8c0"
+original_class_hash = "0x3227a421c1e9822b0966f7d5505f189bd12dc3133faab983a5d42ae35c3c8c0"
+base_class_hash = "0x0"
+abi = "manifests/dev/base/abis/contracts/overdrive-gameActions-13efaa45.json"
+reads = []
+writes = []
+init_calldata = []
+tag = "overdrive-gameActions"
+systems = [
+    "create_game",
+    "get_game",
+    "set_player",
+]
+manifest_name = "overdrive-gameActions-13efaa45"

@@ -128,29 +128,58 @@
   },
   {
     "type": "impl",
-    "name": "PlayerActionsImpl",
-    "interface_name": "overdrive::systems::player_actions::IPlayerActions"
+    "name": "GameActionsImpl",
+    "interface_name": "overdrive::systems::game_actions::IGameActions"
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
   },
   {
     "type": "interface",
-    "name": "overdrive::systems::player_actions::IPlayerActions",
+    "name": "overdrive::systems::game_actions::IGameActions",
     "items": [
       {
         "type": "function",
-        "name": "create_account",
-        "inputs": [
-          {
-            "name": "username",
-            "type": "core::felt252"
-          }
-        ],
+        "name": "create_game",
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
         "type": "function",
-        "name": "get_account",
+        "name": "get_game",
         "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_player",
+        "inputs": [
+          {
+            "name": "game_id",
+            "type": "core::felt252"
+          },
+          {
+            "name": "cipher_value",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "cipher_type",
+            "type": "core::felt252"
+          }
+        ],
         "outputs": [],
         "state_mutability": "external"
       }
@@ -159,11 +188,11 @@
   {
     "type": "impl",
     "name": "IDojoInitImpl",
-    "interface_name": "overdrive::systems::player_actions::playerActions::IDojoInit"
+    "interface_name": "overdrive::systems::game_actions::gameActions::IDojoInit"
   },
   {
     "type": "interface",
-    "name": "overdrive::systems::player_actions::playerActions::IDojoInit",
+    "name": "overdrive::systems::game_actions::gameActions::IDojoInit",
     "items": [
       {
         "type": "function",
@@ -223,7 +252,7 @@
   },
   {
     "type": "event",
-    "name": "overdrive::systems::player_actions::playerActions::Event",
+    "name": "overdrive::systems::game_actions::gameActions::Event",
     "kind": "enum",
     "variants": [
       {
