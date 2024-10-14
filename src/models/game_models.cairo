@@ -1,5 +1,6 @@
 use core::num::traits::Zero;
-use starknet::{ContractAddress, get_block_timestamp, contract_address_const};
+use starknet::{ContractAddress, contract_address_const};
+use starknet::get_block_timestamp;
 
 // Game model
 // Keeps track of the state of the game
@@ -21,6 +22,10 @@ pub struct GamePlayer {
     #[key]
     pub game_id: felt252, // Unique id of the game
     pub car: u256, // Should be a contractAddress NFT
+    pub get_cipher_1: (u256, u256),
+    pub get_cipher_2: (u256, u256),
+    pub get_cipher_3: (u256, u256),
+    pub last_action_timestamp: u64,
     pub score: u256,
     pub energy: u256,
     pub shield: u256,
@@ -65,11 +70,30 @@ impl GameImpl of GameTrait {
             id: 1, created_by, game_status: GameStatus::Ongoing, game_mode: GameMode::SinglePlayer,
         };
 
-        let player_one = GamePlayer {
-            owner: created_by, game_id: 1, car: 1, score: 0, energy: 4, shield: 0
+        let mut player_one = GamePlayer {
+            owner: created_by, 
+            game_id: 1, 
+            car: 1, 
+            score: 0, 
+            energy: 6, 
+            shield: 0, 
+            get_cipher_1: (0, 0),
+            get_cipher_2: (0, 0), 
+            get_cipher_3: (0, 0), 
+            last_action_timestamp: get_block_timestamp()
         };
-        let player_two = GamePlayer {
-            owner: zero_address, game_id: 1, car: 1, score: 0, energy: 4, shield: 0
+
+        let mut player_two = GamePlayer {
+            owner: zero_address, 
+            game_id: 1, 
+            car: 1, 
+            score: 0, 
+            energy: 6, 
+            shield: 0, 
+            get_cipher_1: (0, 0),
+            get_cipher_2: (0, 0), 
+            get_cipher_3: (0, 0),
+            last_action_timestamp: get_block_timestamp()
         };
 
         (game, player_one, player_two)
