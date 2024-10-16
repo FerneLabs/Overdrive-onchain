@@ -8,6 +8,8 @@ mod models {
     mod game_models;
 }
 
+mod utils;
+
 mod tests {
     mod test_world;
 }

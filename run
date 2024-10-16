@@ -3,15 +3,16 @@
 if [[ $1 == "help" ]]; then
     echo -e "\nThis helps you to interact with sozo in an easier way.\n";
     echo -e "\nUsage:";
-    echo -e "   ./run [help] [build] [create USERNAME] [init] [get] [set GAME_ID CIPHER_VALUE CIPHER_TYPE]"
+    echo -e "   ./run [help] [build] [create USERNAME] [init] [get] [state GAME_ID] [request] [set CIPHER_VALUE CIPHER_TYPE]"
     echo -e "\nOptions:";
     echo -e "   help                                  Show this message";
     echo -e "   build                                 Run build and migrate";
     echo -e "   create USERNAME                       Create user";
     echo -e "   get                                   Get user";
     echo -e "   init                                  Initialize game";
-    echo -e "   state                                 Get game state";
-    echo -e "   set GAME_ID CIPHER_VALUE CIPHER_TYPE  Set player state";
+    echo -e "   state GAME_ID                         Get game state";
+    echo -e "   request                               Request ciphers";
+    echo -e "   set CIPHER_VALUE CIPHER_TYPE          Set player state";
     exit 1;
 fi
 
@@ -33,9 +34,13 @@ if [[ $1 == "init" ]]; then
 fi
 
 if [[ $1 == "state" ]]; then
-   sozo execute overdrive-gameActions get_game
+   sozo execute overdrive-gameActions get_game_state -c $(($2))
+fi
+
+if [[ $1 == "request" ]]; then
+   sozo execute overdrive-gameActions get_ciphers
 fi
 
 if [[ $1 == "set" ]]; then
-   sozo execute overdrive-gameActions set_player -c $(($2)),u256:$(($3)),$(($4))
+   sozo execute overdrive-gameActions set_player -c u256:$(($2)),$(($3))
 fi
