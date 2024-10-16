@@ -6,19 +6,22 @@ katana --disable-fee --allowed-origins "*"
 ```
 
 #### Terminal two
-
 ```bash
-# Build the example
-sozo build
+# Build
+./run build
 
-# Migrate the example
-sozo migrate apply
+# Create account
+./run create USERNAME
 
+# Create game - Game ID is returned in Katana
+./run init
+
+# Request ciphers for caller address
+./run request
+
+# Fetch state of game and its players
+./run state GAME_ID
+
+# Set new player values depending on cipher sent, applies to caller address
+./run set CIPHER_VALUE CIPHER_TYPE
 ```
-sozo execute dojo_starter-playerActions create_account
-
-sozo execute dojo_starter-playerActions get_account (vayan a la consola de katana y busquen el print)
-
-sozo execute dojo_starter-playerActions add_win
-
-sozo execute dojo_starter-playerActions get_account (ven los valores actualizados)
