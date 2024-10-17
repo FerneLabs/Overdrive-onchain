@@ -19,7 +19,7 @@ pub struct Game {
 #[dojo::model]
 pub struct GamePlayer {
     #[key]
-    pub address: ContractAddress, // Unique id of the game
+    pub address: ContractAddress,
     pub game_id: usize,
     pub car: u256, // Should be a contractAddress NFT
     // TODO: switch to Cipher Array
@@ -65,41 +65,49 @@ pub enum CipherTypes {
 
 pub trait GameTrait {
     // Create and return a new game
-    fn new_single_player(game_id: usize, player_1: ContractAddress, player_2: ContractAddress) -> (Game, GamePlayer, GamePlayer);
+    fn new_single_player(
+        game_id: usize, player_1: ContractAddress, player_2: ContractAddress
+    ) -> (Game, GamePlayer, GamePlayer);
     fn gen_cipher(value_hash: u256, type_hash: u256) -> Cipher;
 }
 
 impl GameImpl of GameTrait {
-    fn new_single_player(game_id: usize, player_1: ContractAddress, player_2: ContractAddress) -> (Game, GamePlayer, GamePlayer) {
+    fn new_single_player(
+        game_id: usize, player_1: ContractAddress, player_2: ContractAddress
+    ) -> (Game, GamePlayer, GamePlayer) {
         let current_time = get_block_timestamp();
 
         let game = Game {
-            id: game_id, player_1, player_2, game_status: GameStatus::Ongoing, game_mode: GameMode::SinglePlayer,
+            id: game_id,
+            player_1,
+            player_2,
+            game_status: GameStatus::Ongoing,
+            game_mode: GameMode::SinglePlayer,
         };
 
         let mut player_one = GamePlayer {
-            address: player_1, 
-            game_id, 
-            car: 1, 
-            score: 0, 
-            energy: 6, 
-            shield: 0, 
-            get_cipher_1: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0},
-            get_cipher_2: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0}, 
-            get_cipher_3: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0}, 
+            address: player_1,
+            game_id,
+            car: 1,
+            score: 0,
+            energy: 6,
+            shield: 0,
+            get_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            get_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            get_cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
             last_action_timestamp: current_time
         };
 
         let mut player_two = GamePlayer {
-            address: player_2, 
+            address: player_2,
             game_id,
-            car: 1, 
-            score: 0, 
-            energy: 6, 
-            shield: 0, 
-            get_cipher_1: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0},
-            get_cipher_2: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0}, 
-            get_cipher_3: Cipher {cipher_type: CipherTypes::Unknown, cipher_value: 0},
+            car: 1,
+            score: 0,
+            energy: 6,
+            shield: 0,
+            get_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            get_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            get_cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
             last_action_timestamp: current_time,
         };
 
@@ -113,10 +121,10 @@ impl GameImpl of GameTrait {
 
         let mut type_in_range = utils::get_range(type_hash, 0, weights_sum);
         let mut type_index: u256 = 3;
-        let mut value:u256 = 0;
-        
+        let mut value: u256 = 0;
+
         let mut i: u256 = 0;
-        for curr_type in type_weights{
+        for curr_type in type_weights {
             if (type_in_range < *curr_type) {
                 type_index = i;
                 break;
@@ -131,8 +139,8 @@ impl GameImpl of GameTrait {
             value = utils::get_range(value_hash, 1, 5);
         }
 
-        Cipher { 
-            cipher_type: utils::parse_cipher_type(type_index.try_into().unwrap()), 
+        Cipher {
+            cipher_type: utils::parse_cipher_type(type_index.try_into().unwrap()),
             cipher_value: value.try_into().unwrap(),
         }
     }
