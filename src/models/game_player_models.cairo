@@ -1,4 +1,5 @@
 use overdrive::utils;
+use overdrive::constants;
 use starknet::{ContractAddress, get_block_timestamp};
 
 #[derive(Drop, Copy, Serde)]
@@ -33,11 +34,7 @@ pub enum CipherTypes {
     Unknown,
 }
 
-pub trait GamePlayerTrait {
-    fn new_game_player(address: ContractAddress, game_id: u32) -> GamePlayer;
-    fn gen_cipher(value_hash: u256, type_hash: u256) -> Cipher;
-}
-
+#[generate_trait]
 impl GamePlayerImpl of GamePlayerTrait {
     fn new_game_player(address: ContractAddress, game_id: u32) -> GamePlayer {
         let current_time = get_block_timestamp();
@@ -84,6 +81,84 @@ impl GamePlayerImpl of GamePlayerTrait {
         Cipher {
             cipher_type: utils::parse_cipher_type(type_index.try_into().unwrap()),
             cipher_value: value.try_into().unwrap(),
+        }
+    }
+
+    fn calc_energy_regen(ref player: GamePlayer) -> () {
+        let current_time = get_block_timestamp();
+        let time_since_action: u64 = current_time - player.last_action_timestamp;
+    
+        let energy_regenerated: u64 = time_since_action / constants::REGEN_EVERY.into();
+        let reminder_seconds: u64 = time_since_action % constants::REGEN_EVERY.into();
+    
+        player.energy = if (player.energy + energy_regenerated.into() > 10) {
+            10
+        } else {
+            player.energy + energy_regenerated.into()
+        };
+    
+        player.last_action_timestamp = current_time - reminder_seconds;
+    }
+    
+    fn get_cipher_stats(
+        ciphers: Array<Cipher>, 
+        ref cipher_total_type: CipherTypes, 
+        ref cipher_total_value: u8
+    ) -> () {
+        // Check for max combo
+        if (ciphers.len() == 3
+            && ciphers[0].cipher_type == ciphers[1].cipher_type
+            && ciphers[0].cipher_type == ciphers[2].cipher_type) {
+            cipher_total_value = (*ciphers[0].cipher_value + *ciphers[1].cipher_value + *ciphers[2].cipher_value) * 2;
+            cipher_total_type = *ciphers[0].cipher_type;
+        } else {
+            // Check if at least there are two equal types
+            if (ciphers.len() == 2 && ciphers[0].cipher_type == ciphers[1].cipher_type) {
+                cipher_total_value = *ciphers[0].cipher_value + *ciphers[1].cipher_value;
+                cipher_total_type = *ciphers[0].cipher_type;
+            }
+            if (ciphers.len() == 3 && ciphers[0].cipher_type == ciphers[2].cipher_type) {
+                cipher_total_value = *ciphers[0].cipher_value + *ciphers[2].cipher_value;
+                cipher_total_type = *ciphers[0].cipher_type;
+            }
+            if (ciphers.len() == 3 && ciphers[1].cipher_type == ciphers[2].cipher_type) {
+                cipher_total_value = *ciphers[1].cipher_value + *ciphers[2].cipher_value;
+                cipher_total_type = *ciphers[1].cipher_type;
+            }
+        }
+    }
+    
+    fn handle_cipher_action(
+        ref player: GamePlayer, 
+        ref opponent: GamePlayer, 
+        cipher_total_type: CipherTypes, 
+        cipher_total_value: u8
+    ) -> () {
+        match cipher_total_type {
+            CipherTypes::Advance => { 
+                player.score += cipher_total_value.into();
+                println!("Running advance {:?} {:?}", player.score, cipher_total_value);
+                // TODO: Check for end game
+            },
+            CipherTypes::Attack => {
+                let mut cipher_attack = if (opponent.shield > cipher_total_value.into()) {
+                    opponent.shield -= cipher_total_value.into();
+                    0
+                } else {
+                    let shield = opponent.shield;
+                    opponent.shield = 0;
+                    cipher_total_value.into() - shield
+                };
+    
+                if (opponent.score < cipher_attack) {
+                    opponent.score = 0;
+                } else {
+                    opponent.score -= cipher_attack;
+                }
+            },
+            CipherTypes::Shield => { player.shield += cipher_total_value.into(); },
+            CipherTypes::Energy => { player.energy += cipher_total_value.into(); },
+            _ => { assert(cipher_total_type == CipherTypes::Unknown, constants::UNKNOWN_CIPHER_TYPE); },
         }
     }
 }

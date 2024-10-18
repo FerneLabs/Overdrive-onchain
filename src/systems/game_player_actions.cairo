@@ -1,5 +1,6 @@
-use overdrive::models::{game_player_models::{GamePlayer, GamePlayerTrait, Cipher, CipherTypes}};
+use overdrive::models::{game_models::{Game}, game_player_models::{GamePlayer, GamePlayerTrait, Cipher, CipherTypes}};
 use overdrive::utils;
+use overdrive::constants;
 use starknet::{ContractAddress};
 
 #[dojo::interface]
@@ -12,39 +13,16 @@ trait IGamePlayerActions {
 
 #[dojo::contract]
 mod gamePlayerActions {
-    use super::{IGamePlayerActions, GamePlayer, GamePlayerTrait, Cipher, CipherTypes, utils};
+    use super::{Game, IGamePlayerActions, GamePlayer, GamePlayerTrait, Cipher, CipherTypes, utils, constants};
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
     #[abi(embed_v0)]
     impl GamePlayerActionsImpl of IGamePlayerActions<ContractState> {
         fn get_ciphers(ref world: IWorldDispatcher) {
             // let START_ENERGY = 6;
-            let REGEN_SECONDS: u64 = 3;
             let caller_address = get_caller_address();
             let mut player = get!(world, caller_address, (GamePlayer));
 
-            let current_time = get_block_timestamp();
-            let time_since_action: u64 = current_time - player.last_action_timestamp;
-
-            let energy_regenerated: u64 = time_since_action / REGEN_SECONDS;
-            let reminder_seconds: u64 = time_since_action % REGEN_SECONDS;
-
-            println!(
-                "Energy regenerated {:?} in {:?} seconds", energy_regenerated, time_since_action
-            );
-            println!(
-                "Current energy: {:?} ({:?} + {:?})",
-                player.energy + energy_regenerated.into(),
-                player.energy,
-                energy_regenerated
-            );
-
-            player
-                .energy =
-                    if (player.energy + energy_regenerated.into() > 10) {
-                        10
-                    } else {
-                        player.energy + energy_regenerated.into()
-                    };
+            GamePlayerTrait::calc_energy_regen(ref player);
 
             if (player.energy >= 4) {
                 // Pseudo-random seed generation using caller address, block_number, game_id, and
@@ -53,7 +31,7 @@ mod gamePlayerActions {
                     caller_address.into(),
                     get_block_number().into(),
                     player.game_id.into(),
-                    current_time.into()
+                    get_block_timestamp().into()
                 );
                 // println!("Creating seed with: {:?} / {:?} / {:?} / {:?}", owner,
                 // get_block_number(), game_id, current_time);
@@ -71,8 +49,6 @@ mod gamePlayerActions {
                 player.get_cipher_3 = GamePlayerTrait::gen_cipher(type_3_hash, value_3_hash);
 
                 player.energy -= 4;
-                player.last_action_timestamp = current_time - reminder_seconds;
-
                 set!(world, (player));
             }
         }
@@ -85,78 +61,25 @@ mod gamePlayerActions {
                 return;
             }
 
-            let mut cipher_total_value = 0;
-            let mut cipher_total_type = CipherTypes::Unknown(());
-            // Check for max combo
-            if ciphers.len() == 3
-                && ciphers[0].cipher_type == ciphers[1].cipher_type
-                && ciphers[0].cipher_type == ciphers[2].cipher_type {
-                cipher_total_value +=
-                    (*ciphers[0].cipher_value + *ciphers[1].cipher_value + *ciphers[2].cipher_value)
-                    * 2;
-                cipher_total_type = *ciphers[0].cipher_type;
-            } else {
-                // Check if at least there are two equal types
-                if (ciphers.len() > 2 && ciphers[0].cipher_type == ciphers[1].cipher_type) {
-                    cipher_total_value = *ciphers[0].cipher_value + *ciphers[1].cipher_value;
-                    cipher_total_type = *ciphers[0].cipher_type;
-                }
-                if (ciphers.len() == 3 && ciphers[0].cipher_type == ciphers[2].cipher_type) {
-                    cipher_total_value = *ciphers[0].cipher_value + *ciphers[2].cipher_value;
-                    cipher_total_type = *ciphers[0].cipher_type;
-                }
-                if (ciphers.len() == 3 && ciphers[1].cipher_type == ciphers[2].cipher_type) {
-                    cipher_total_value = *ciphers[1].cipher_value + *ciphers[2].cipher_value;
-                    cipher_total_type = *ciphers[1].cipher_type;
-                }
-            };
-            println!(
-                "CIPHER 1 TYPE: {:?} VALUE: {:?}", ciphers[0].cipher_type, ciphers[0].cipher_value
-            );
-            println!(
-                "CIPHER 2 TYPE: {:?} VALUE: {:?}", ciphers[1].cipher_type, ciphers[1].cipher_value
-            );
-            if ciphers.len() == 3 {
-                println!(
-                    "CIPHER 3 TYPE: {:?} VALUE: {:?}",
-                    ciphers[2].cipher_type,
-                    ciphers[2].cipher_value
-                );
-            }
-            println!("CIPHER TOTAL TYPE: {:?} VALUE: {:?}", cipher_total_type, cipher_total_value);
-
             let mut player = get!(world, player_address, (GamePlayer));
+            let game = get!(world, player.game_id, (Game));
+            let mut opponent = if (game.player_1 == player_address) {
+                get!(world, game.player_2, (GamePlayer))
+            } else {
+                get!(world, game.player_1, (GamePlayer))
+            };
 
-            match cipher_total_type {
-                CipherTypes::Advance => { player.score += cipher_total_value.into(); },
-                CipherTypes::Attack => {
-                    let mut cipher_attack = if player.shield > cipher_total_value.into() {
-                        player.shield -= cipher_total_value.into();
-                        0
-                    } else {
-                        let shield = player.shield;
-                        player.shield = 0;
-                        cipher_total_value.into() - shield
-                    };
+            let mut cipher_total_value: u8 = 0;
+            let mut cipher_total_type = CipherTypes::Unknown;
 
-                    if player.score < cipher_attack {
-                        player.score = 0;
-                    } else {
-                        player.score -= cipher_attack;
-                    }
-                },
-                CipherTypes::Shield => { player.shield += cipher_total_value.into(); },
-                //TODO JOJO CHEQUEA EL TEMA DE LA ENERGIA
-                CipherTypes::Energy => {
-                    if player.energy + cipher_total_value.into() < 10 {
-                        player.energy = 10;
-                    } else {
-                        player.energy += cipher_total_value.into();
-                    }
-                },
-                //TODO SE PODRIA PONER UN ASSERT
-                CipherTypes::Unknown => {},
-            }
+            GamePlayerTrait::calc_energy_regen(ref player);
+            GamePlayerTrait::get_cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
+            GamePlayerTrait::handle_cipher_action(ref player, ref opponent, cipher_total_type, cipher_total_value);
+
+            // Reset player ciphers
+            player.get_cipher_1 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player.get_cipher_2 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player.get_cipher_3 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
 
             set!(world, (player));
         }

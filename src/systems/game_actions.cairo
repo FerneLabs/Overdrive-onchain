@@ -2,6 +2,7 @@ use overdrive::models::{
     game_models::{Game, GameTrait, GameMode, GameStatus}, game_player_models::{GamePlayer}
 };
 use overdrive::utils;
+use overdrive::constants;
 use starknet::{ContractAddress, contract_address_const};
 
 pub mod Errors {
@@ -21,12 +22,8 @@ trait IGameActions {
 
 #[dojo::contract]
 mod gameActions {
-    use super::Errors;
-    use super::{IGameActions, Game, GameMode, GameStatus, GameTrait, utils, GamePlayer};
-    use starknet::{
-        ContractAddress, contract_address_const, get_caller_address,
-        get_block_timestamp, get_block_number
-    };
+    use super::{IGameActions, Game, GameMode, GameStatus, GameTrait, utils, GamePlayer, constants};
+    use starknet::{ContractAddress, contract_address_const, get_caller_address};
     use core::num::traits::Zero;
 
     #[abi(embed_v0)]
@@ -38,7 +35,7 @@ mod gameActions {
 
             // TODO: Handle user already playing - maybe add playing bool to account struct
             // let mut existing_account = get!(world, owner, (Account));
-            // assert(existing_account.username == username, Errors::USERNAME_TAKEN);
+            // assert(existing_account.username == username, constants::USERNAME_TAKEN);
 
             let (new_game, new_player_one, new_player_two) = GameTrait::new_game(
                 game_id, owner, zero_address
@@ -78,13 +75,6 @@ mod gameActions {
                 player_one.get_cipher_3.cipher_type,
                 player_one.get_cipher_3.cipher_value
             );
-            // println!("PLAYER 2 CIPHERS:");
-        // println!("  CIPHER 1: {:?} - {:?}", player_two.get_cipher_1.cipher_type,
-        // player_two.get_cipher_1.cipher_value);
-        // println!("  CIPHER 2: {:?} - {:?}", player_two.get_cipher_2.cipher_type,
-        // player_two.get_cipher_2.cipher_value);
-        // println!("  CIPHER 3: {:?} - {:?}", player_two.get_cipher_3.cipher_type,
-        // player_two.get_cipher_3.cipher_value);
         }
 
         fn end_game(
