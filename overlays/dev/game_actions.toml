@@ -1,2 +1,2 @@
 tag = "overdrive-gameActions"
-writes = ["overdrive-Game", "overdrive-GamePlayer"]
+writes = ["overdrive-Game", "overdrive-Player"]
