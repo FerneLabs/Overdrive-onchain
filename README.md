@@ -7,6 +7,9 @@ katana --disable-fee --allowed-origins "*"
 
 #### Terminal two
 ```bash
+# See all methods
+./run help
+
 # Build
 ./run build
 
@@ -14,7 +17,8 @@ katana --disable-fee --allowed-origins "*"
 ./run create USERNAME
 
 # Create game - Game ID is returned in Katana
-./run init
+# GAME_MODE = 0 for SinglePlayer
+./run init GAME_MODE
 
 # Request ciphers for caller address
 ./run request
@@ -23,5 +27,5 @@ katana --disable-fee --allowed-origins "*"
 ./run state GAME_ID
 
 # Set new player values depending on cipher sent, applies to caller address
-./run set CIPHER_VALUE CIPHER_TYPE
+./run set PARAMS
 ```
