@@ -9,7 +9,6 @@ use starknet::{ContractAddress, contract_address_const};
 trait IGameActions {
     fn create_game(ref world: IWorldDispatcher, game_mode: GameMode);
     fn get_game_state(ref world: IWorldDispatcher, game_id: felt252);
-    fn end_game(ref world: IWorldDispatcher, game_id: felt252);
 }
 
 #[dojo::contract]
@@ -44,18 +43,22 @@ mod gameActions {
             let game = get!(world, game_id, (Game));
 
             let player_one = get!(world, game.player_1, (Player));
-            let _player_two = get!(world, game.player_2, (Player));
+            let player_two = get!(world, game.player_2, (Player));
 
             println!("GAME ID: {:?}", game.id);
             println!("GAME STATUS: {:?}", game.game_status);
             println!("GAME WINNER: {:?}", game.winner_address);
             println!("GAME RESULT: {:?}", game.result);
             println!("GAME MODE: {:?}", game.game_mode);
-            println!("PLAYER ADDRESS: {:?}", player_one.address);
-            println!("PLAYER CAR: {:?}", player_one.car);
-            println!("PLAYER SCORE: {:?}", player_one.score);
-            println!("PLAYER ENERGY: {:?}", player_one.energy);
-            println!("PLAYER SHIELD: {:?}", player_one.shield);
+            println!("PLAYER 1 ADDRESS: {:?}", player_one.address);
+            println!("PLAYER 1 CAR: {:?}", player_one.car);
+            println!("PLAYER 1 SCORE: {:?}", player_one.score);
+            println!("PLAYER 1 ENERGY: {:?}", player_one.energy);
+            println!("PLAYER 1 SHIELD: {:?}", player_one.shield);
+            println!("=======================");
+            println!("PLAYER 2 ADDRESS: {:?}", player_two.address);
+            println!("PLAYER 2 SCORE: {:?}", player_two.score);
+            println!("=======================");
             println!("PLAYER 1 CIPHERS:");
             println!(
                 "  CIPHER 1: {:?} - {:?}",
@@ -72,21 +75,6 @@ mod gameActions {
                 player_one.get_cipher_3.cipher_type,
                 player_one.get_cipher_3.cipher_value
             );
-        }
-
-        fn end_game(
-            ref world: IWorldDispatcher, game_id: felt252
-        ) { // TODO: Finish logic, assign wins and loses to corresponding account
-        // let game_id: usize = game_id.try_into().unwrap();
-        // let game = get!(world, game_id, (Game));
-
-        // let player_1 = get!(world, game.player_1, (Player));
-        // let _player_2 = get!(world, game.player_2, (Player));
-
-        // game.game_status = GameStatus::Ended;
-
-        // player_1.game_id = 0;
-        // player_2.game_id = 0;
         }
     }
 }

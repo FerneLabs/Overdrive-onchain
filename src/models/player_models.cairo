@@ -113,7 +113,7 @@ impl PlayerImpl of PlayerTrait {
             cipher_total_type = *ciphers[0].cipher_type;
         } else {
             // Check if at least there are two equal types
-            if ((ciphers.len() == 2 || ciphers.len() == 3) && ciphers[0].cipher_type == ciphers[1].cipher_type) {
+            if (ciphers.len() >= 2 && ciphers[0].cipher_type == ciphers[1].cipher_type) {
                 cipher_total_value = *ciphers[0].cipher_value + *ciphers[1].cipher_value;
                 cipher_total_type = *ciphers[0].cipher_type;
             }

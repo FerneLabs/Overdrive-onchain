@@ -1,5 +1,6 @@
 use overdrive::models::{account_models::{Garage, Account, AccountTrait}};
 use overdrive::constants;
+use starknet::ContractAddress;
 
 #[dojo::interface]
 trait IAccountActions {

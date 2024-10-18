@@ -23,4 +23,11 @@ impl AccountImpl of AccountTrait {
     fn new(username: felt252, address: ContractAddress) -> Account {
         Account { address, username, total_games_played: 0, total_games_won: 0 }
     }
+
+    fn update_stats(ref account: Account, has_won: bool) -> () {
+        if (has_won) {
+            account.total_games_won += 1;
+        }
+        account.total_games_played += 1;
+    }
 }

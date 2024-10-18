@@ -1,4 +1,8 @@
-use overdrive::models::{game_models::{Game, GameTrait, GameStatus}, player_models::{Player, PlayerTrait, Cipher, CipherTypes}};
+use overdrive::models::{
+    game_models::{Game, GameTrait, GameStatus}, 
+    player_models::{Player, PlayerTrait, Cipher, CipherTypes},
+    account_models::{Account}
+};
 use overdrive::utils;
 use overdrive::constants;
 use starknet::{ContractAddress};
@@ -13,13 +17,12 @@ trait IPlayerActions {
 
 #[dojo::contract]
 mod playerActions {
-    use super::{Game, GameTrait, GameStatus, IPlayerActions, Player, PlayerTrait, Cipher, CipherTypes, utils, constants};
+    use super::{Game, GameTrait, GameStatus, IPlayerActions, Player, PlayerTrait, Account, Cipher, CipherTypes, utils, constants};
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
         fn get_ciphers(ref world: IWorldDispatcher) {
-            // let START_ENERGY = 6;
             let caller_address = get_caller_address();
             let mut player = get!(world, caller_address, (Player));
 
@@ -83,8 +86,20 @@ mod playerActions {
                 player.score >= constants::MAX_SCORE.into() 
                 && player.score > opponent.score
             ) {
-                GameTrait::end_game(ref game, ref player, ref opponent);
+                let mut winner_account = get!(world, player.address, (Account));
+                let mut loser_account = get!(world, opponent.address, (Account));
+
+                GameTrait::end_game(
+                    ref game, 
+                    ref player, 
+                    ref opponent, 
+                    ref winner_account, 
+                    ref loser_account
+                );
+
                 set!(world, (game));
+                set!(world, (winner_account));
+                set!(world, (loser_account));
             }
 
             if (cipher_total_type == CipherTypes::Attack) {

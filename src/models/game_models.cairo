@@ -1,7 +1,7 @@
 use core::num::traits::Zero;
 use starknet::{ContractAddress, contract_address_const};
 use overdrive::utils;
-use overdrive::models::{player_models::{Player, PlayerTrait}};
+use overdrive::models::{player_models::{Player, PlayerTrait}, account_models::{Account, AccountTrait}};
 
 // Game model
 // Keeps track of the state of the game
@@ -54,12 +54,21 @@ impl GameImpl of GameTrait {
         (game, player_one, player_two)
     }
 
-    fn end_game(ref game: Game, ref winner: Player, ref loser: Player) -> () {
+    fn end_game(
+        ref game: Game, 
+        ref winner: Player, 
+        ref loser: Player, 
+        ref winner_account: Account, 
+        ref loser_account: Account
+    ) -> () {
         game.game_status = GameStatus::Ended;
         game.winner_address = winner.address;
         game.result = (
             winner.score.try_into().unwrap(), 
             loser.score.try_into().unwrap()
         );
+
+        AccountTrait::update_stats(ref winner_account, true);
+        AccountTrait::update_stats(ref loser_account, false);
     }
 }
