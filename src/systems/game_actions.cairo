@@ -48,6 +48,8 @@ mod gameActions {
 
             println!("GAME ID: {:?}", game.id);
             println!("GAME STATUS: {:?}", game.game_status);
+            println!("GAME WINNER: {:?}", game.winner_address);
+            println!("GAME RESULT: {:?}", game.result);
             println!("GAME MODE: {:?}", game.game_mode);
             println!("PLAYER ADDRESS: {:?}", player_one.address);
             println!("PLAYER CAR: {:?}", player_one.car);

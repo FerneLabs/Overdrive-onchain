@@ -5,4 +5,6 @@ pub const USERNAME_EXIST: felt252 = 'username already exist';
 pub const ONLY_OWNER_USERNAME: felt252 = 'only user can update username';
 pub const UNKNOWN_CIPHER_TYPE: felt252 = 'cipher type is not valid';
 
+pub const START_ENERGY: u8 = 6;
 pub const REGEN_EVERY: u8 = 3;
+pub const MAX_SCORE: u8 = 100;

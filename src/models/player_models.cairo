@@ -44,7 +44,7 @@ impl PlayerImpl of PlayerTrait {
             game_id,
             car: 1,
             score: 0,
-            energy: 6,
+            energy: constants::START_ENERGY.into(),
             shield: 0,
             get_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
             get_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
@@ -131,15 +131,11 @@ impl PlayerImpl of PlayerTrait {
     fn handle_cipher_action(
         ref player: Player, 
         ref opponent: Player, 
-        cipher_total_type: CipherTypes, 
-        cipher_total_value: u8
+        ref cipher_total_type: CipherTypes, 
+        ref cipher_total_value: u8
     ) -> () {
         match cipher_total_type {
-            CipherTypes::Advance => { 
-                player.score += cipher_total_value.into();
-                println!("Running advance {:?} {:?}", player.score, cipher_total_value);
-                // TODO: Check for end game
-            },
+            CipherTypes::Advance => { player.score += cipher_total_value.into(); },
             CipherTypes::Attack => {
                 let mut cipher_attack = if (opponent.shield > cipher_total_value.into()) {
                     opponent.shield -= cipher_total_value.into();
