@@ -1,10 +1,10 @@
 use core::poseidon::PoseidonTrait;
 use core::hash::{HashStateTrait, HashStateExTrait};
-use overdrive::models::game_models::CipherTypes;
+use overdrive::models::game_player_models::CipherTypes;
 
 pub fn hash2(val_1: felt252, val_2: felt252) -> felt252 {
     let mut hash = PoseidonTrait::new();
-    
+
     hash = hash.update(val_1);
     hash = hash.update(val_2);
 

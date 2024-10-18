@@ -38,9 +38,9 @@ if [[ $1 == "state" ]]; then
 fi
 
 if [[ $1 == "request" ]]; then
-   sozo execute overdrive-gameActions get_ciphers
+   sozo execute overdrive-gamePlayerActions get_ciphers
 fi
 
 if [[ $1 == "set" ]]; then
-   sozo execute overdrive-gameActions set_player -c u256:$(($2)),$(($3))
+   sozo execute overdrive-gamePlayerActions set_player -c u256:$(($2)),$(($3))
 fi
