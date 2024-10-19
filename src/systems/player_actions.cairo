@@ -9,9 +9,9 @@ use starknet::{ContractAddress};
 
 #[dojo::interface]
 trait IPlayerActions {
-    fn get_ciphers(ref world: IWorldDispatcher);
+    fn get_ciphers(ref world: IWorldDispatcher, game_id: felt252);
     fn set_player(
-        ref world: IWorldDispatcher, ciphers: Array<Cipher>, player_address: ContractAddress
+        ref world: IWorldDispatcher, game_id: felt252, ciphers: Array<Cipher>, player_address: ContractAddress
     );
 }
 
@@ -22,9 +22,10 @@ mod playerActions {
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
-        fn get_ciphers(ref world: IWorldDispatcher) {
+        fn get_ciphers(ref world: IWorldDispatcher, game_id: felt252) {
+            let game_id: usize = game_id.try_into().unwrap();
             let caller_address = get_caller_address();
-            let mut player = get!(world, caller_address, (Player));
+            let mut player = get!(world, (caller_address, game_id), (Player));
 
             PlayerTrait::calc_energy_regen(ref player);
 
@@ -56,18 +57,22 @@ mod playerActions {
         }
 
         fn set_player(
-            ref world: IWorldDispatcher, ciphers: Array<Cipher>, player_address: ContractAddress
+            ref world: IWorldDispatcher,
+            game_id: felt252, 
+            ciphers: Array<Cipher>, 
+            player_address: ContractAddress
         ) {
             if (ciphers.len() < 2) { return; }
 
-            let mut player = get!(world, player_address, (Player));
-            let mut game = get!(world, player.game_id, (Game));
+            let game_id: usize = game_id.try_into().unwrap();
+            let mut game = get!(world, game_id, (Game));
             if (game.game_status == GameStatus::Ended) { return; }
-            
+
+            let mut player = get!(world, (player_address, game_id), (Player));
             let mut opponent = if (game.player_1 == player_address) {
-                get!(world, game.player_2, (Player))
+                get!(world, (game.player_2, game_id), (Player))
             } else {
-                get!(world, game.player_1, (Player))
+                get!(world, (game.player_1, game_id), (Player))
             };
 
             let mut cipher_total_value: u8 = 0;
@@ -100,13 +105,15 @@ mod playerActions {
                 set!(world, (game));
                 set!(world, (winner_account));
                 set!(world, (loser_account));
+                delete!(world, (player));
+                delete!(world, (opponent));
+            } else {
+                if (cipher_total_type == CipherTypes::Attack) {
+                    set!(world, (opponent));
+                }
+    
+                set!(world, (player));
             }
-
-            if (cipher_total_type == CipherTypes::Attack) {
-                set!(world, (opponent));
-            }
-
-            set!(world, (player));
         }
     }
 }

@@ -7,6 +7,7 @@ use starknet::{ContractAddress, get_block_timestamp};
 pub struct Player {
     #[key]
     pub address: ContractAddress,
+    #[key]
     pub game_id: usize,
     pub car: u256, // Should be a contractAddress NFT
     // TODO: switch to Cipher Array

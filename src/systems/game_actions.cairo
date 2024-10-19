@@ -42,8 +42,8 @@ mod gameActions {
             let game_id: usize = game_id.try_into().unwrap();
             let game = get!(world, game_id, (Game));
 
-            let player_one = get!(world, game.player_1, (Player));
-            let player_two = get!(world, game.player_2, (Player));
+            let player_one = get!(world, (game.player_1, game_id), (Player));
+            let player_two = get!(world, (game.player_2, game_id), (Player));
 
             println!("GAME ID: {:?}", game.id);
             println!("GAME STATUS: {:?}", game.game_status);

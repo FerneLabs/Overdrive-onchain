@@ -27,9 +27,9 @@ mod accountActions {
         }
 
         fn get_account(ref world: IWorldDispatcher) {
-            let player = get_caller_address();
+            let address = get_caller_address();
 
-            let account = get!(world, player, (Account));
+            let account = get!(world, address, (Account));
 
             println!(
                 "USERNAME: {}, PLAYED: {}, WINS: {}",
