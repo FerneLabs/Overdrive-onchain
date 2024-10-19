@@ -1,7 +1,7 @@
 use core::num::traits::Zero;
-use starknet::{ContractAddress};
+use starknet::{ContractAddress, contract_address_const};
 use overdrive::utils;
-use overdrive::models::{player_models::{Player, PlayerTrait}};
+use overdrive::models::{player_models::{Player, PlayerTrait}, account_models::{Account, AccountTrait}};
 
 // Game model
 // Keeps track of the state of the game
@@ -14,6 +14,8 @@ pub struct Game {
     pub player_2: ContractAddress,
     pub game_status: GameStatus,
     pub game_mode: GameMode,
+    pub winner_address: ContractAddress,
+    pub result: (u8, u8)
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
@@ -41,12 +43,32 @@ impl GameImpl of GameTrait {
             player_1,
             player_2,
             game_status: GameStatus::Ongoing,
-            game_mode
+            game_mode,
+            winner_address: contract_address_const::<0x0>(),
+            result: (0, 0),
         };
 
         let mut player_one = PlayerTrait::create_player(player_1, game_id);
         let mut player_two = PlayerTrait::create_player(player_2, game_id);
 
         (game, player_one, player_two)
+    }
+
+    fn end_game(
+        ref game: Game, 
+        ref winner: Player, 
+        ref loser: Player, 
+        ref winner_account: Account, 
+        ref loser_account: Account
+    ) -> () {
+        game.game_status = GameStatus::Ended;
+        game.winner_address = winner.address;
+        game.result = (
+            winner.score.try_into().unwrap(), 
+            loser.score.try_into().unwrap()
+        );
+
+        AccountTrait::update_stats(ref winner_account, true);
+        AccountTrait::update_stats(ref loser_account, false);
     }
 }

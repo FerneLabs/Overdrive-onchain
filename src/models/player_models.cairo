@@ -7,6 +7,7 @@ use starknet::{ContractAddress, get_block_timestamp};
 pub struct Player {
     #[key]
     pub address: ContractAddress,
+    #[key]
     pub game_id: usize,
     pub car: u256, // Should be a contractAddress NFT
     // TODO: switch to Cipher Array
@@ -44,7 +45,7 @@ impl PlayerImpl of PlayerTrait {
             game_id,
             car: 1,
             score: 0,
-            energy: 6,
+            energy: constants::START_ENERGY.into(),
             shield: 0,
             get_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
             get_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
@@ -113,7 +114,7 @@ impl PlayerImpl of PlayerTrait {
             cipher_total_type = *ciphers[0].cipher_type;
         } else {
             // Check if at least there are two equal types
-            if ((ciphers.len() == 2 || ciphers.len() == 3) && ciphers[0].cipher_type == ciphers[1].cipher_type) {
+            if (ciphers.len() >= 2 && ciphers[0].cipher_type == ciphers[1].cipher_type) {
                 cipher_total_value = *ciphers[0].cipher_value + *ciphers[1].cipher_value;
                 cipher_total_type = *ciphers[0].cipher_type;
             }
@@ -131,15 +132,11 @@ impl PlayerImpl of PlayerTrait {
     fn handle_cipher_action(
         ref player: Player, 
         ref opponent: Player, 
-        cipher_total_type: CipherTypes, 
-        cipher_total_value: u8
+        ref cipher_total_type: CipherTypes, 
+        ref cipher_total_value: u8
     ) -> () {
         match cipher_total_type {
-            CipherTypes::Advance => { 
-                player.score += cipher_total_value.into();
-                println!("Running advance {:?} {:?}", player.score, cipher_total_value);
-                // TODO: Check for end game
-            },
+            CipherTypes::Advance => { player.score += cipher_total_value.into(); },
             CipherTypes::Attack => {
                 let mut cipher_attack = if (opponent.shield > cipher_total_value.into()) {
                     opponent.shield -= cipher_total_value.into();
