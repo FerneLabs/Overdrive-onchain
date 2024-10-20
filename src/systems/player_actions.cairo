@@ -9,7 +9,7 @@ use starknet::{ContractAddress};
 
 #[dojo::interface]
 trait IPlayerActions {
-    fn get_ciphers(ref world: IWorldDispatcher, game_id: felt252);
+    fn ciphers(ref world: IWorldDispatcher, game_id: felt252);
     fn set_player(
         ref world: IWorldDispatcher, game_id: felt252, ciphers: Array<Cipher>, player_address: ContractAddress
     );
@@ -22,7 +22,7 @@ mod playerActions {
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
-        fn get_ciphers(ref world: IWorldDispatcher, game_id: felt252) {
+        fn ciphers(ref world: IWorldDispatcher, game_id: felt252) {
             let game_id: usize = game_id.try_into().unwrap();
             let caller_address = get_caller_address();
             let mut player = get!(world, (caller_address, game_id), (Player));
@@ -47,9 +47,9 @@ mod playerActions {
                 let value_2_hash: u256 = utils::hash2(seed, 5).into();
                 let value_3_hash: u256 = utils::hash2(seed, 6).into();
 
-                player.get_cipher_1 = PlayerTrait::gen_cipher(type_1_hash, value_1_hash);
-                player.get_cipher_2 = PlayerTrait::gen_cipher(type_2_hash, value_2_hash);
-                player.get_cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
+                player.cipher_1 = PlayerTrait::gen_cipher(type_1_hash, value_1_hash);
+                player.cipher_2 = PlayerTrait::gen_cipher(type_2_hash, value_2_hash);
+                player.cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
 
                 player.energy -= 4;
                 set!(world, (player));
@@ -79,13 +79,13 @@ mod playerActions {
             let mut cipher_total_type = CipherTypes::Unknown;
 
             PlayerTrait::calc_energy_regen(ref player);
-            PlayerTrait::get_cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
+            PlayerTrait::cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
             PlayerTrait::handle_cipher_action(ref player, ref opponent, ref cipher_total_type, ref cipher_total_value);
 
             // Reset player ciphers
-            player.get_cipher_1 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player.get_cipher_2 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player.get_cipher_3 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player.cipher_1 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player.cipher_2 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player.cipher_3 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
 
             if (
                 player.score >= constants::MAX_SCORE.into() 

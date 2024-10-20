@@ -11,9 +11,9 @@ pub struct Player {
     pub game_id: usize,
     pub car: u256, // Should be a contractAddress NFT
     // TODO: switch to Cipher Array
-    pub get_cipher_1: Cipher,
-    pub get_cipher_2: Cipher,
-    pub get_cipher_3: Cipher,
+    pub cipher_1: Cipher,
+    pub cipher_2: Cipher,
+    pub cipher_3: Cipher,
     pub last_action_timestamp: u64,
     pub score: u256,
     pub energy: u256,
@@ -47,9 +47,9 @@ impl PlayerImpl of PlayerTrait {
             score: 0,
             energy: constants::START_ENERGY.into(),
             shield: 0,
-            get_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-            get_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-            get_cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
             last_action_timestamp: current_time
         }
     }
@@ -101,7 +101,7 @@ impl PlayerImpl of PlayerTrait {
         player.last_action_timestamp = current_time - reminder_seconds;
     }
     
-    fn get_cipher_stats(
+    fn cipher_stats(
         ciphers: Array<Cipher>, 
         ref cipher_total_type: CipherTypes, 
         ref cipher_total_value: u8

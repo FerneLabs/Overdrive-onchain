@@ -62,18 +62,18 @@ mod gameActions {
             println!("PLAYER 1 CIPHERS:");
             println!(
                 "  CIPHER 1: {:?} - {:?}",
-                player_one.get_cipher_1.cipher_type,
-                player_one.get_cipher_1.cipher_value
+                player_one.cipher_1.cipher_type,
+                player_one.cipher_1.cipher_value
             );
             println!(
                 "  CIPHER 2: {:?} - {:?}",
-                player_one.get_cipher_2.cipher_type,
-                player_one.get_cipher_2.cipher_value
+                player_one.cipher_2.cipher_type,
+                player_one.cipher_2.cipher_value
             );
             println!(
                 "  CIPHER 3: {:?} - {:?}",
-                player_one.get_cipher_3.cipher_type,
-                player_one.get_cipher_3.cipher_value
+                player_one.cipher_3.cipher_type,
+                player_one.cipher_3.cipher_value
             );
         }
     }

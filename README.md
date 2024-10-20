@@ -29,15 +29,15 @@ subscription {
         score
         shield
         energy
-        get_cipher_1 {
+        cipher_1 {
           cipher_type
           cipher_value
         }
-        get_cipher_2 {
+        cipher_2 {
           cipher_type
           cipher_value
         }
-        get_cipher_3 {
+        cipher_3 {
           cipher_type
           cipher_value
         }
