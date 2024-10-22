@@ -99,8 +99,56 @@ impl PlayerImpl of PlayerTrait {
     //     }
     // }
 
-
-
+    fn initialize_player(player_address: ContractAddress, username: felt252) -> (
+        Account, 
+        Assets, 
+        Race, 
+        RaceState, 
+        HackedCiphers, 
+        DeckCiphers
+    ) {
+        (
+            Account {
+                player_address,
+                username,
+                games_played: 0,
+                games_won: 0
+            },
+            Assets {
+                player_address,
+                cars: 0,
+                profile_icons: 0,
+                garage_environments: 0
+            },
+            Race {
+                player_address,
+                game_id: 0,
+                is_active: false
+            },
+            RaceState {
+                player_address,
+                score: 0,
+                shield: 0,
+                energy: 0,
+                last_action_time: 0
+            },
+            HackedCiphers {
+                player_address,
+                cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 }
+            },
+            DeckCiphers {
+                player_address,
+                cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_4: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                cipher_5: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+            }
+        )
+    }
+    
     // TODO: use appropiate types instead of u256
     fn gen_cipher(value_hash: u256, type_hash: u256) -> Cipher {
         let type_weights = [40_u256, 25_u256, 20_u256, 15_u256].span(); // ADV, ATT, SHI, ENE
@@ -132,20 +180,20 @@ impl PlayerImpl of PlayerTrait {
         }
     }
 
-    fn calc_energy_regen(ref player: Player) -> () {
+    fn calc_energy_regen(ref raceState: RaceState) -> () {
         let current_time = get_block_timestamp();
-        let time_since_action: u64 = current_time - player.last_action_timestamp;
+        let time_since_action: u64 = current_time - raceState.last_action_time;
     
         let energy_regenerated: u64 = time_since_action / constants::REGEN_EVERY.into();
         let reminder_seconds: u64 = time_since_action % constants::REGEN_EVERY.into();
     
-        player.energy = if (player.energy + energy_regenerated.into() > 10) {
+        raceState.energy = if (raceState.energy + energy_regenerated.into() > 10) {
             10
         } else {
-            player.energy + energy_regenerated.into()
+            raceState.energy + energy_regenerated.into()
         };
     
-        player.last_action_timestamp = current_time - reminder_seconds;
+        raceState.last_action_timestamp = current_time - reminder_seconds;
     }
     
     fn cipher_stats(

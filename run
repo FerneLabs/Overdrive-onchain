@@ -38,7 +38,7 @@ if [[ $1 == "state" ]]; then
 fi
 
 if [[ $1 == "request" ]]; then
-   sozo execute overdrive-playerActions ciphers -c $2
+   sozo execute overdrive-playerActions hack_ciphers -c $2
 fi
 
 if [[ $1 == "set" ]]; then

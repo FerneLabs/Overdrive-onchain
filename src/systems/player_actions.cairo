@@ -1,7 +1,12 @@
 use overdrive::models::{
     game_models::{Game, GameTrait, GameStatus}, 
-    player_models::{Player, PlayerTrait, Cipher, CipherTypes},
-    account_models::{Account}
+    player_models::{
+        PlayerTrait,
+        Account, Assets, 
+        Race, RaceState, 
+        HackedCiphers, DeckCiphers, 
+        Cipher, CipherTypes
+    }
 };
 use overdrive::utils;
 use overdrive::constants;
@@ -9,7 +14,8 @@ use starknet::{ContractAddress};
 
 #[dojo::interface]
 trait IPlayerActions {
-    fn ciphers(ref world: IWorldDispatcher, game_id: felt252);
+    fn create_player(ref world: IWorldDispatcher, username: felt252);
+    fn hack_ciphers(ref world: IWorldDispatcher);
     fn set_player(
         ref world: IWorldDispatcher, game_id: felt252, ciphers: Array<Cipher>, player_address: ContractAddress
     );
@@ -17,19 +23,33 @@ trait IPlayerActions {
 
 #[dojo::contract]
 mod playerActions {
-    use super::{Game, GameTrait, GameStatus, IPlayerActions, Player, PlayerTrait, Account, Cipher, CipherTypes, utils, constants};
+    use super::{
+        Game, GameTrait, 
+        GameStatus, 
+        IPlayerActions, PlayerTrait, 
+        Account, Assets, 
+        Race, RaceState, 
+        HackedCiphers, DeckCiphers, 
+        Cipher, CipherTypes, 
+        utils, constants
+    };
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
-        fn ciphers(ref world: IWorldDispatcher, game_id: felt252) {
-            let game_id: usize = game_id.try_into().unwrap();
-            let caller_address = get_caller_address();
-            let mut player = get!(world, (caller_address, game_id), (Player));
+        fn create_player(ref world: IWorldDispatcher, username: felt252) {
+            // TODO: Check if account already exists for this address
+            let address = get_caller_address();
+            set!(world, PlayerTrait::initialize_player(address, username));
+        }
 
-            PlayerTrait::calc_energy_regen(ref player);
+        fn hack_ciphers(ref world: IWorldDispatcher) {
+            let player_address = get_caller_address();
+            let (mut raceState, mut hackedCiphers) = get!(world, player_address, (RaceState, HackedCiphers));
 
-            if (player.energy >= 4) {
+            PlayerTrait::calc_energy_regen(ref raceState);
+
+            if (raceState.energy >= 4) {
                 // Pseudo-random seed generation using caller address, block_number, game_id, and
                 // current time
                 let seed = utils::hash4(
@@ -47,12 +67,12 @@ mod playerActions {
                 let value_2_hash: u256 = utils::hash2(seed, 5).into();
                 let value_3_hash: u256 = utils::hash2(seed, 6).into();
 
-                player.cipher_1 = PlayerTrait::gen_cipher(type_1_hash, value_1_hash);
-                player.cipher_2 = PlayerTrait::gen_cipher(type_2_hash, value_2_hash);
-                player.cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
+                hackedCiphers.cipher_1 = PlayerTrait::gen_cipher(type_1_hash, value_1_hash);
+                hackedCiphers.cipher_2 = PlayerTrait::gen_cipher(type_2_hash, value_2_hash);
+                hackedCiphers.cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
 
-                player.energy -= 4;
-                set!(world, (player));
+                raceState.energy -= 4;
+                set!(world, (raceState, hackedCiphers));
             }
         }
 
@@ -68,7 +88,7 @@ mod playerActions {
             let mut game = get!(world, game_id, (Game));
             if (game.game_status == GameStatus::Ended) { return; }
 
-            let mut player = get!(world, (player_address, game_id), (Player));
+            let (mut raceState, mut hackedCiphers) = get!(world, player_address, (RaceState, HackedCiphers));
             let mut opponent = if (game.player_1 == player_address) {
                 get!(world, (game.player_2, game_id), (Player))
             } else {
