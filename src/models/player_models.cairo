@@ -4,20 +4,65 @@ use starknet::{ContractAddress, get_block_timestamp};
 
 #[derive(Drop, Copy, Serde)]
 #[dojo::model]
-pub struct Player {
+pub struct Account {
     #[key]
-    pub address: ContractAddress,
+    pub player_address: ContractAddress,
+    pub username: felt252,
+    pub games_played: usize,
+    pub games_won: usize,
+}
+
+#[derive(Drop, Copy, Serde)]
+#[dojo::model]
+pub struct Assets {
     #[key]
+    pub player_address: ContractAddress,
+    // TODO: NFT addresses
+    pub cars: felt252,
+    pub profile_icons: felt252,
+    pub garage_environments: felt252
+}
+
+#[derive(Drop, Copy, Serde)]
+#[dojo::model]
+pub struct Race {
+    #[key]
+    pub player_address: ContractAddress,
     pub game_id: usize,
-    pub car: u256, // Should be a contractAddress NFT
-    // TODO: switch to Cipher Array
+    pub is_active: bool
+}
+
+#[derive(Drop, Copy, Serde)]
+#[dojo::model]
+pub struct RaceState {
+    #[key]
+    pub player_address: ContractAddress,
+    pub score: u16,
+    pub shield: u8,
+    pub energy: u8,
+    pub last_action_time: u64
+}
+
+#[derive(Drop, Copy, Serde)]
+#[dojo::model]
+pub struct HackedCiphers {
+    #[key]
+    pub player_address: ContractAddress,
     pub cipher_1: Cipher,
     pub cipher_2: Cipher,
     pub cipher_3: Cipher,
-    pub last_action_timestamp: u64,
-    pub score: u256,
-    pub energy: u256,
-    pub shield: u256,
+}
+
+#[derive(Drop, Copy, Serde)]
+#[dojo::model]
+pub struct DeckCiphers {
+    #[key]
+    pub player_address: ContractAddress,
+    pub cipher_1: Cipher,
+    pub cipher_2: Cipher,
+    pub cipher_3: Cipher,
+    pub cipher_4: Cipher,
+    pub cipher_5: Cipher,
 }
 
 #[derive(Drop, Copy, Serde, Introspect, Debug)]
@@ -37,22 +82,24 @@ pub enum CipherTypes {
 
 #[generate_trait]
 impl PlayerImpl of PlayerTrait {
-    fn create_player(address: ContractAddress, game_id: u32) -> Player {
-        let current_time = get_block_timestamp();
+    // fn create_player(address: ContractAddress, game_id: u32) -> Player {
+    //     let current_time = get_block_timestamp();
 
-        Player {
-            address: address,
-            game_id,
-            car: 1,
-            score: 0,
-            energy: constants::START_ENERGY.into(),
-            shield: 0,
-            cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-            cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-            cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-            last_action_timestamp: current_time
-        }
-    }
+    //     Player {
+    //         address: address,
+    //         game_id,
+    //         car: 1,
+    //         score: 0,
+    //         energy: constants::START_ENERGY.into(),
+    //         shield: 0,
+    //         cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+    //         cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+    //         cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+    //         last_action_timestamp: current_time
+    //     }
+    // }
+
+
 
     // TODO: use appropiate types instead of u256
     fn gen_cipher(value_hash: u256, type_hash: u256) -> Cipher {
