@@ -1,2 +1,8 @@
 tag = "overdrive-playerActions"
-writes = ["overdrive-Player", "overdrive-Game", "overdrive-Account"]
+writes = [
+    "overdrive-PlayerAccount",
+    "overdrive-PlayerAssets",
+    "overdrive-PlayerState",
+    "overdrive-PlayerCiphers", 
+    "overdrive-GameState"
+]
