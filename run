@@ -3,16 +3,14 @@
 if [[ $1 == "help" ]]; then
     echo -e "\nThis helps you to interact with sozo in an easier way.\n";
     echo -e "\nUsage:";
-    echo -e "   ./run [help] [build] [create USERNAME] [init GAME_MODE] [get] [state GAME_ID] [request] [set CIPHER_VALUE CIPHER_TYPE]"
+    echo -e "   ./run [help] [build] [create USERNAME] [init GAME_MODE] [request IS_BOT] [run PARAMS]"
     echo -e "\nOptions:";
     echo -e "   help                                  Show this message";
     echo -e "   build                                 Run build and migrate";
     echo -e "   create USERNAME                       Create user";
-    echo -e "   get                                   Get user";
     echo -e "   init GAME_MODE                        Initialize game";
-    echo -e "   state GAME_ID                         Get game state";
-    echo -e "   request                               Request ciphers";
-    echo -e "   set PARAMS                            Set player state";
+    echo -e "   request IS_BOT                        Request ciphers";
+    echo -e "   run PARAMS                            Run cipher module. Params are int:ARRAY_SIZE,[TYPE,VALUE],IS_BOT";
     exit 1;
 fi
 
@@ -22,25 +20,17 @@ if [[ $1 == "build" ]]; then
 fi
 
 if [[ $1 == "create" ]]; then
-   sozo execute overdrive-accountActions create_account -c sstr:$2
-fi
-
-if [[ $1 == "get" ]]; then
-   sozo execute overdrive-accountActions get_account
+   sozo execute overdrive-playerActions create_player -c sstr:$2
 fi
 
 if [[ $1 == "init" ]]; then
    sozo execute overdrive-gameActions create_game -c $(($2))
 fi
 
-if [[ $1 == "state" ]]; then
-   sozo execute overdrive-gameActions get_game_state -c $(($2))
-fi
-
 if [[ $1 == "request" ]]; then
-   sozo execute overdrive-playerActions ciphers -c $2
+   sozo execute overdrive-playerActions hack_ciphers -c $(($2))
 fi
 
-if [[ $1 == "set" ]]; then
-   sozo execute overdrive-playerActions set_player -c $2
+if [[ $1 == "run" ]]; then
+   sozo execute overdrive-playerActions run_cipher_module -c $2
 fi

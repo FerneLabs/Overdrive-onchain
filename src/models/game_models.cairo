@@ -1,21 +1,28 @@
 use core::num::traits::Zero;
-use starknet::{ContractAddress, contract_address_const};
+use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
 use overdrive::utils;
-use overdrive::models::{player_models::{Player, PlayerTrait}, account_models::{Account, AccountTrait}};
+use overdrive::models::{
+    player_models::{
+        PlayerState,
+        PlayerAccount
+    }
+};
 
 // Game model
 // Keeps track of the state of the game
 #[derive(Drop, Copy, Serde)]
 #[dojo::model]
-pub struct Game {
+pub struct GameState {
     #[key]
     pub id: usize,
     pub player_1: ContractAddress,
     pub player_2: ContractAddress,
-    pub game_status: GameStatus,
-    pub game_mode: GameMode,
+    pub status: GameStatus,
+    pub mode: GameMode,
     pub winner_address: ContractAddress,
-    pub result: (u8, u8)
+    pub result: (u8, u8),
+    pub start_time: u64,
+    pub end_time: u64
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
@@ -37,38 +44,48 @@ impl GameImpl of GameTrait {
         player_1: ContractAddress, 
         player_2: ContractAddress,
         game_mode: GameMode
-    ) -> (Game, Player, Player) {
-        let game = Game {
+    ) -> GameState {
+        GameState {
             id: game_id,
             player_1,
             player_2,
-            game_status: GameStatus::Ongoing,
-            game_mode,
+            status: GameStatus::Ongoing,
+            mode: game_mode,
             winner_address: contract_address_const::<0x0>(),
             result: (0, 0),
-        };
-
-        let mut player_one = PlayerTrait::create_player(player_1, game_id);
-        let mut player_two = PlayerTrait::create_player(player_2, game_id);
-
-        (game, player_one, player_two)
+            start_time: get_block_timestamp(),
+            end_time: 0
+        }
     }
 
     fn end_game(
-        ref game: Game, 
-        ref winner: Player, 
-        ref loser: Player, 
-        ref winner_account: Account, 
-        ref loser_account: Account
+        ref game_state: GameState, 
+        ref winner_player: PlayerState, 
+        ref loser_player: PlayerState, 
+        ref winner_account: PlayerAccount, 
+        ref loser_account: PlayerAccount
     ) -> () {
-        game.game_status = GameStatus::Ended;
-        game.winner_address = winner.address;
-        game.result = (
-            winner.score.try_into().unwrap(), 
-            loser.score.try_into().unwrap()
-        );
+        game_state.winner_address = winner_player.player_address;
+        // In a SinglePlayer match, 
+        // always set the real player result as first element in the tuple
+        game_state.result = if (winner_player.is_bot) {
+            (
+                loser_player.score.try_into().unwrap(),
+                winner_player.score.try_into().unwrap()
+            )
+        } else {
+            (
+                winner_player.score.try_into().unwrap(), 
+                loser_player.score.try_into().unwrap()
+            )
+        };
 
-        AccountTrait::update_stats(ref winner_account, true);
-        AccountTrait::update_stats(ref loser_account, false);
+        game_state.status = GameStatus::Ended;
+        game_state.end_time = get_block_timestamp();
+
+        winner_account.games_played += 1;
+        winner_account.games_won += 1; // TODO: this is not working for some reason
+
+        loser_account.games_played += 1;
     }
 }
