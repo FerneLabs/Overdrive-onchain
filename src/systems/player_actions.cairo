@@ -146,44 +146,18 @@ mod playerActions {
                 PlayerTrait::reset_ciphers(ref player_ciphers, true, true);
                 PlayerTrait::reset_ciphers(ref opponent_ciphers, true, true);
 
-                if (opponent_state.is_bot) {
-                    set!(
-                        world,
-                        (
-                            game_state,
-                            player_state,
-                            opponent_state,
-                            winner_account,
-                            player_ciphers,
-                            opponent_ciphers
-                        )
-                    );
-                } else if (player_state.is_bot) {
-                    set!(
-                        world,
-                        (
-                            game_state,
-                            player_state,
-                            opponent_state,
-                            loser_account,
-                            player_ciphers,
-                            opponent_ciphers
-                        )
-                    );
-                } else {
-                    set!(
-                        world,
-                        (
-                            game_state,
-                            player_state,
-                            opponent_state,
-                            winner_account,
-                            loser_account,
-                            player_ciphers,
-                            opponent_ciphers
-                        )
-                    );
-                }
+                set!(
+                    world,
+                    (
+                        game_state,
+                        player_state,
+                        opponent_state,
+                        loser_account,
+                        winner_account,
+                        player_ciphers,
+                        opponent_ciphers
+                    )
+                );
             } else {
                 if (cipher_total_type == CipherTypes::Attack) {
                     set!(world, (opponent_state));

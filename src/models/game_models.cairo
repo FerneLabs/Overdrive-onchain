@@ -77,9 +77,11 @@ impl GameImpl of GameTrait {
         game_state.status = GameStatus::Ended;
         game_state.end_time = get_block_timestamp();
 
+        if (!winner_player.is_bot) {
+            winner_account.games_won += 1;
+        }
+        
         winner_account.games_played += 1;
-        winner_account.games_won += 1; // TODO: this is not working for some reason
-
         loser_account.games_played += 1;
     }
 }
