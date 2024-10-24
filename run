@@ -7,17 +7,22 @@ if [[ $1 == "help" ]]; then
     echo -e "\nOptions:";
     echo -e "   help                                  Show this message";
     echo -e "   build                                 Run build and migrate";
+    echo -e "   katana                                Run Katana instance";
     echo -e "   torii                                 Run Torii instance";
     echo -e "   create USERNAME                       Create user";
     echo -e "   init GAME_MODE                        Initialize game";
     echo -e "   request IS_BOT                        Request ciphers";
-    echo -e "   run PARAMS                            Run cipher module. Params are int:ARRAY_SIZE,[TYPE,VALUE],IS_BOT";
+    echo -e "   module PARAMS                         Run cipher module. Params are int:ARRAY_SIZE,[TYPE,VALUE],IS_BOT";
     exit 1;
 fi
 
 if [[ $1 == "build" ]]; then
    sozo build;
    sozo migrate apply;
+fi
+
+if [[ $1 == "katana" ]]; then
+   katana --disable-fee
 fi
 
 if [[ $1 == "torii" ]]; then
@@ -36,6 +41,6 @@ if [[ $1 == "request" ]]; then
    sozo execute overdrive-playerActions hack_ciphers -c $(($2))
 fi
 
-if [[ $1 == "run" ]]; then
+if [[ $1 == "module" ]]; then
    sozo execute overdrive-playerActions run_cipher_module -c $2
 fi

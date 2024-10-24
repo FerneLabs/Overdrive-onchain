@@ -1,7 +1,7 @@
 
 ### Run Katana
 ```bash
-katana --disable-fee
+./run katana
 ```
 
 ### Build and migrate
@@ -12,7 +12,7 @@ katana --disable-fee
 ### Run Torii
 
 ```bash
-torii --world 0x611ff61e3381fcab007822cddc4ab3c68983b1450cc61e37eefbbf7699e116d
+./run torii
 ```  
 ### Go to GraphQL playground:  
 [http://localhost:8080/graphql](http://localhost:8080/graphql)  
@@ -186,13 +186,19 @@ torii --world 0x611ff61e3381fcab007822cddc4ab3c68983b1450cc61e37eefbbf7699e116d
 # Create account
 ./run create USERNAME
 
-# Create game - Game ID is returned in Katana
-# GAME_MODE = 0 for SinglePlayer
+# Create new game. GAME_MODE = 0 (SP) || 1 (MP) 
 ./run init GAME_MODE
 
-# Request ciphers for caller address
+# Request ciphers for caller address. IS_BOT = 0 || 1
 ./run request IS_BOT
 
 # Runs module with cipher values sent
-./run run PARAMS
+./run module PARAMS
+  # Example usage:
+  ./run module int:3,0,10,0,10,0,10,0
+  # Where: 
+    # int:3 -> Length of array
+    # 0,10 -> cipher_type,cipher_value
+    # 0 -> is_bot = false
+  
 ```
