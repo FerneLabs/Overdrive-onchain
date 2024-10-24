@@ -1,12 +1,6 @@
 use overdrive::models::{
-    game_models::{GameTrait, GameState, GameStatus}, 
-    player_models::{
-        PlayerTrait,
-        PlayerAccount, 
-        PlayerState, 
-        PlayerCiphers, 
-        Cipher, CipherTypes
-    }
+    game_models::{GameTrait, GameState, GameStatus},
+    player_models::{PlayerTrait, PlayerAccount, PlayerState, PlayerCiphers, Cipher, CipherTypes}
 };
 use overdrive::utils;
 use overdrive::constants;
@@ -16,23 +10,14 @@ use starknet::{ContractAddress};
 trait IPlayerActions {
     fn create_player(ref world: IWorldDispatcher, username: felt252);
     fn hack_ciphers(ref world: IWorldDispatcher, is_bot: bool);
-    fn run_cipher_module(
-        ref world: IWorldDispatcher, ciphers: Array<Cipher>, is_bot: bool
-    );
+    fn run_cipher_module(ref world: IWorldDispatcher, ciphers: Array<Cipher>, is_bot: bool);
 }
 
 #[dojo::contract]
 mod playerActions {
     use super::{
-        GameTrait,
-        GameState,
-        GameStatus, 
-        IPlayerActions, PlayerTrait, 
-        PlayerAccount, 
-        PlayerState, 
-        PlayerCiphers, 
-        Cipher, CipherTypes, 
-        utils, constants
+        GameTrait, GameState, GameStatus, IPlayerActions, PlayerTrait, PlayerAccount, PlayerState,
+        PlayerCiphers, Cipher, CipherTypes, utils, constants
     };
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
 
@@ -41,23 +26,17 @@ mod playerActions {
         fn create_player(ref world: IWorldDispatcher, username: felt252) {
             // TODO: Check if account already exists for this address
             let address = get_caller_address();
-            let (
-                player_account,
-                player_assets,
-                player_state,
-                player_ciphers
+            let (player_account, player_assets, player_state, player_ciphers) =
+                PlayerTrait::create_player(
+                address, false, username
+            );
 
-            ) = PlayerTrait::create_player(address, false, username);
-
-            let (
-                _bot_account,
-                _bot_assets,
-                bot_state,
-                bot_ciphers,
-            ) = PlayerTrait::create_player(address, true, username);
+            let (_bot_account, _bot_assets, bot_state, bot_ciphers,) = PlayerTrait::create_player(
+                address, true, username
+            );
 
             set!(
-                world, 
+                world,
                 (
                     player_account,
                     player_assets,
@@ -71,9 +50,13 @@ mod playerActions {
 
         fn hack_ciphers(ref world: IWorldDispatcher, is_bot: bool) {
             let player_address = get_caller_address();
-            let (mut player_state, mut player_ciphers) = get!(world, (player_address, is_bot), (PlayerState, PlayerCiphers));
+            let (mut player_state, mut player_ciphers) = get!(
+                world, (player_address, is_bot), (PlayerState, PlayerCiphers)
+            );
 
-            if (!player_state.playing) { return; }
+            if (!player_state.playing) {
+                return;
+            }
 
             println!("Running energy calc");
             PlayerTrait::calc_energy_regen(ref player_state);
@@ -106,26 +89,24 @@ mod playerActions {
             }
         }
 
-        fn run_cipher_module(
-            ref world: IWorldDispatcher,
-            ciphers: Array<Cipher>,
-            is_bot: bool
-        ) {
-            if (ciphers.len() < 2) { return; }
-            
+        fn run_cipher_module(ref world: IWorldDispatcher, ciphers: Array<Cipher>, is_bot: bool) {
+            if (ciphers.len() < 2) {
+                return;
+            }
+
             let player_address = get_caller_address();
             let player_state = get!(world, (player_address, is_bot), (PlayerState));
 
             let mut game_state = get!(world, player_state.game_id, (GameState));
-            if (game_state.status == GameStatus::Ended) { return; }
+            if (game_state.status == GameStatus::Ended) {
+                return;
+            }
 
             let (mut player_state, mut player_ciphers) = get!(
-                world, 
-                (player_address, is_bot), 
-                (PlayerState, PlayerCiphers)
+                world, (player_address, is_bot), (PlayerState, PlayerCiphers)
             );
 
-            // TODO: This should work for Single Player, 
+            // TODO: This should work for Single Player,
             // but !is_bot should be changed when implementing MultiPlayer
             let mut opponent_state = if (game_state.player_1 == player_address) {
                 get!(world, (game_state.player_2, !is_bot), (PlayerState))
@@ -139,27 +120,24 @@ mod playerActions {
             PlayerTrait::calc_energy_regen(ref player_state);
             PlayerTrait::calc_cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
             PlayerTrait::handle_cipher_action(
-                ref player_state,
-                ref opponent_state,
-                ref cipher_total_type,
-                ref cipher_total_value
+                ref player_state, ref opponent_state, ref cipher_total_type, ref cipher_total_value
             );
 
             // Check if game should be ended
-            if (
-                player_state.score >= constants::MAX_SCORE.into() 
-                && player_state.score > opponent_state.score
-            ) {
+            if (player_state.score >= constants::MAX_SCORE.into()
+                && player_state.score > opponent_state.score) {
                 let mut winner_account = get!(world, player_state.player_address, (PlayerAccount));
                 let mut loser_account = get!(world, opponent_state.player_address, (PlayerAccount));
-                let mut opponent_ciphers = get!(world, (opponent_state.player_address, is_bot), (PlayerCiphers));
+                let mut opponent_ciphers = get!(
+                    world, (opponent_state.player_address, !is_bot), (PlayerCiphers)
+                );
 
                 // TODO: games_won is not incrementing for some reason
                 GameTrait::end_game(
                     ref game_state,
                     ref player_state,
-                    ref opponent_state, 
-                    ref winner_account, 
+                    ref opponent_state,
+                    ref winner_account,
                     ref loser_account
                 );
 
@@ -169,13 +147,13 @@ mod playerActions {
                 PlayerTrait::reset_ciphers(ref opponent_ciphers, true, true);
 
                 set!(
-                    world, 
+                    world,
                     (
                         game_state,
                         player_state,
                         opponent_state,
-                        winner_account,
                         loser_account,
+                        winner_account,
                         player_ciphers,
                         opponent_ciphers
                     )

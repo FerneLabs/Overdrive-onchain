@@ -1,12 +1,7 @@
 use core::num::traits::Zero;
 use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
 use overdrive::utils;
-use overdrive::models::{
-    player_models::{
-        PlayerState,
-        PlayerAccount
-    }
-};
+use overdrive::models::{player_models::{PlayerState, PlayerAccount}};
 
 // Game model
 // Keeps track of the state of the game
@@ -40,10 +35,7 @@ pub enum GameStatus {
 #[generate_trait]
 impl GameImpl of GameTrait {
     fn new_game(
-        game_id: usize, 
-        player_1: ContractAddress, 
-        player_2: ContractAddress,
-        game_mode: GameMode
+        game_id: usize, player_1: ContractAddress, player_2: ContractAddress, game_mode: GameMode
     ) -> GameState {
         GameState {
             id: game_id,
@@ -59,33 +51,37 @@ impl GameImpl of GameTrait {
     }
 
     fn end_game(
-        ref game_state: GameState, 
-        ref winner_player: PlayerState, 
-        ref loser_player: PlayerState, 
-        ref winner_account: PlayerAccount, 
+        ref game_state: GameState,
+        ref winner_player: PlayerState,
+        ref loser_player: PlayerState,
+        ref winner_account: PlayerAccount,
         ref loser_account: PlayerAccount
     ) -> () {
         game_state.winner_address = winner_player.player_address;
-        // In a SinglePlayer match, 
+        // In a SinglePlayer match,
         // always set the real player result as first element in the tuple
-        game_state.result = if (winner_player.is_bot) {
-            (
-                loser_player.score.try_into().unwrap(),
-                winner_player.score.try_into().unwrap()
-            )
-        } else {
-            (
-                winner_player.score.try_into().unwrap(), 
-                loser_player.score.try_into().unwrap()
-            )
-        };
+        game_state
+            .result =
+                if (winner_player.is_bot) {
+                    (
+                        loser_player.score.try_into().unwrap(),
+                        winner_player.score.try_into().unwrap()
+                    )
+                } else {
+                    (
+                        winner_player.score.try_into().unwrap(),
+                        loser_player.score.try_into().unwrap()
+                    )
+                };
 
         game_state.status = GameStatus::Ended;
         game_state.end_time = get_block_timestamp();
 
+        if (!winner_player.is_bot) {
+            winner_account.games_won += 1;
+        }
+        
         winner_account.games_played += 1;
-        winner_account.games_won += 1; // TODO: this is not working for some reason
-
         loser_account.games_played += 1;
     }
 }

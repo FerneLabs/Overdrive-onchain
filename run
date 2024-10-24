@@ -7,6 +7,7 @@ if [[ $1 == "help" ]]; then
     echo -e "\nOptions:";
     echo -e "   help                                  Show this message";
     echo -e "   build                                 Run build and migrate";
+    echo -e "   torii                                 Run Torii instance";
     echo -e "   create USERNAME                       Create user";
     echo -e "   init GAME_MODE                        Initialize game";
     echo -e "   request IS_BOT                        Request ciphers";
@@ -17,6 +18,10 @@ fi
 if [[ $1 == "build" ]]; then
    sozo build;
    sozo migrate apply;
+fi
+
+if [[ $1 == "torii" ]]; then
+   torii --world 0x611ff61e3381fcab007822cddc4ab3c68983b1450cc61e37eefbbf7699e116d
 fi
 
 if [[ $1 == "create" ]]; then
