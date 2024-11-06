@@ -86,11 +86,6 @@ mod playerActions {
 
                 player_ciphers.hack_ciphers = hacked_ciphers;
 
-                // Workaround for graphql query error when getting the ciphers
-                println!("Cipher 1 {:?}", player_ciphers.hack_ciphers[0]);
-                println!("Cipher 2 {:?}", player_ciphers.hack_ciphers[1]);
-                println!("Cipher 3 {:?}", player_ciphers.hack_ciphers[2]);
-
                 player_state.energy -= 4;
                 world.write_model(@player_state);
                 world.write_model(@player_ciphers);

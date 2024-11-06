@@ -122,27 +122,26 @@
 
   ```graphql
   query {
-    overdrivePlayerCiphersModels (order: {field: IS_BOT, direction: ASC}) {
+    entities {
       edges {
         node {
-          player_address
-          is_bot
-          hack_cipher_1 {
-            cipher_type
-            cipher_value
-          }
-          hack_cipher_2{
-            cipher_type
-            cipher_value
-          }
-          hack_cipher_3{
-            cipher_type
-            cipher_value
+          models {
+            __typename
+            ... on overdrive_PlayerCiphers {
+              hack_ciphers {
+                cipher_type
+                cipher_value
+              }
+              deck_ciphers {
+                cipher_type
+                cipher_value
+              }
+            }
           }
         }
       }
     }
-  }
+}
   ```
   
 </details>
