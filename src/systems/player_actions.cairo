@@ -21,6 +21,7 @@ mod playerActions {
     };
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
     use dojo::model::{ModelStorage, ModelValueStorage};
+    use core::ArrayTrait;
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
@@ -78,9 +79,17 @@ mod playerActions {
                 let value_3_hash: u256 = utils::hash2(seed, 6).into();
 
                 println!("Running cipher gen");
-                player_ciphers.hack_cipher_1 = PlayerTrait::gen_cipher(type_1_hash, value_1_hash);
-                player_ciphers.hack_cipher_2 = PlayerTrait::gen_cipher(type_2_hash, value_2_hash);
-                player_ciphers.hack_cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
+                let mut hacked_ciphers = ArrayTrait::<Cipher>::new();
+                hacked_ciphers.append(PlayerTrait::gen_cipher(type_1_hash, value_1_hash));
+                hacked_ciphers.append(PlayerTrait::gen_cipher(type_2_hash, value_2_hash));
+                hacked_ciphers.append(PlayerTrait::gen_cipher(type_3_hash, value_3_hash));
+
+                player_ciphers.hack_ciphers = hacked_ciphers;
+
+                // Workaround for graphql query error when getting the ciphers
+                println!("Cipher 1 {:?}", player_ciphers.hack_ciphers[0]);
+                println!("Cipher 2 {:?}", player_ciphers.hack_ciphers[1]);
+                println!("Cipher 3 {:?}", player_ciphers.hack_ciphers[2]);
 
                 player_state.energy -= 4;
                 world.write_model(@player_state);
@@ -97,7 +106,7 @@ mod playerActions {
             let mut world = self.world(@"overdrive");
 
             let mut player_state: PlayerState = world.read_model((player_address, is_bot));
-            let mut player_ciphers: PlayerCiphers = world.read_model((player_address, is_bot));
+            let player_ciphers: PlayerCiphers = world.read_model((player_address, is_bot));
 
             let mut game_state: GameState = world.read_model(player_state.game_id);
             if (game_state.status == GameStatus::Ended) {
@@ -128,7 +137,7 @@ mod playerActions {
                 let mut winner_account: PlayerAccount = world.read_model(player_state.player_address);
                 let mut loser_account: PlayerAccount = world.read_model(opponent_state.player_address);
                 // TODO: should change the !is_bot when implementing multiplayer
-                let mut opponent_ciphers: PlayerCiphers = world.read_model((opponent_state.player_address, !is_bot)); 
+                let opponent_ciphers: PlayerCiphers = world.read_model((opponent_state.player_address, !is_bot)); 
 
                 GameTrait::end_game(
                     ref game_state,
@@ -140,8 +149,8 @@ mod playerActions {
 
                 PlayerTrait::reset_state(ref player_state);
                 PlayerTrait::reset_state(ref opponent_state);
-                PlayerTrait::reset_ciphers(ref player_ciphers, true, true);
-                PlayerTrait::reset_ciphers(ref opponent_ciphers, true, true);
+                let player_ciphers = PlayerTrait::reset_ciphers(player_ciphers, true, true);
+                let opponent_ciphers = PlayerTrait::reset_ciphers(opponent_ciphers, true, true);
 
                 world.write_model(@game_state);
                 world.write_model(@player_state);
@@ -155,7 +164,7 @@ mod playerActions {
                     world.write_model(@opponent_state);
                 }
 
-                PlayerTrait::reset_ciphers(ref player_ciphers, true, false);
+                let player_ciphers = PlayerTrait::reset_ciphers(player_ciphers, true, false);
                 world.write_model(@player_state);
                 world.write_model(@player_ciphers);
             }
