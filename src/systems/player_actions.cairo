@@ -6,11 +6,11 @@ use overdrive::utils;
 use overdrive::constants;
 use starknet::{ContractAddress};
 
-#[dojo::interface]
-trait IPlayerActions {
-    fn create_player(ref world: IWorldDispatcher, username: felt252);
-    fn hack_ciphers(ref world: IWorldDispatcher, is_bot: bool);
-    fn run_cipher_module(ref world: IWorldDispatcher, ciphers: Array<Cipher>, is_bot: bool);
+#[starknet::interface]
+trait IPlayerActions<T> {
+    fn create_player(ref self: T, username: felt252);
+    fn hack_ciphers(ref self: T, is_bot: bool);
+    fn run_cipher_module(ref self: T, ciphers: Array<Cipher>, is_bot: bool);
 }
 
 #[dojo::contract]
@@ -20,10 +20,11 @@ mod playerActions {
         PlayerCiphers, Cipher, CipherTypes, utils, constants
     };
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_block_number};
+    use dojo::model::{ModelStorage, ModelValueStorage};
 
     #[abi(embed_v0)]
     impl PlayerActionsImpl of IPlayerActions<ContractState> {
-        fn create_player(ref world: IWorldDispatcher, username: felt252) {
+        fn create_player(ref self: ContractState, username: felt252) {
             // TODO: Check if account already exists for this address
             let address = get_caller_address();
             let (player_account, player_assets, player_state, player_ciphers) =
@@ -35,24 +36,21 @@ mod playerActions {
                 address, true, username
             );
 
-            set!(
-                world,
-                (
-                    player_account,
-                    player_assets,
-                    player_state,
-                    player_ciphers,
-                    bot_state,
-                    bot_ciphers
-                )
-            );
+            let mut world = self.world(@"overdrive");
+            world.write_model(@player_account);
+            world.write_model(@player_assets);
+            world.write_model(@player_state);
+            world.write_model(@player_ciphers);
+            world.write_model(@bot_state);
+            world.write_model(@bot_ciphers);
         }
 
-        fn hack_ciphers(ref world: IWorldDispatcher, is_bot: bool) {
+        fn hack_ciphers(ref self: ContractState, is_bot: bool) {
             let player_address = get_caller_address();
-            let (mut player_state, mut player_ciphers) = get!(
-                world, (player_address, is_bot), (PlayerState, PlayerCiphers)
-            );
+
+            let mut world = self.world(@"overdrive");
+            let mut player_state: PlayerState = world.read_model((player_address, is_bot));
+            let mut player_ciphers: PlayerCiphers = world.read_model((player_address, is_bot));
 
             if (!player_state.playing) {
                 return;
@@ -85,33 +83,34 @@ mod playerActions {
                 player_ciphers.hack_cipher_3 = PlayerTrait::gen_cipher(type_3_hash, value_3_hash);
 
                 player_state.energy -= 4;
-                set!(world, (player_state, player_ciphers));
+                world.write_model(@player_state);
+                world.write_model(@player_ciphers);
             }
         }
 
-        fn run_cipher_module(ref world: IWorldDispatcher, ciphers: Array<Cipher>, is_bot: bool) {
+        fn run_cipher_module(ref self: ContractState, ciphers: Array<Cipher>, is_bot: bool) {
             if (ciphers.len() < 2) {
                 return;
             }
 
             let player_address = get_caller_address();
-            let player_state = get!(world, (player_address, is_bot), (PlayerState));
+            let mut world = self.world(@"overdrive");
 
-            let mut game_state = get!(world, player_state.game_id, (GameState));
+            let mut player_state: PlayerState = world.read_model((player_address, is_bot));
+            let mut player_ciphers: PlayerCiphers = world.read_model((player_address, is_bot));
+
+            let mut game_state: GameState = world.read_model(player_state.game_id);
             if (game_state.status == GameStatus::Ended) {
                 return;
             }
 
-            let (mut player_state, mut player_ciphers) = get!(
-                world, (player_address, is_bot), (PlayerState, PlayerCiphers)
-            );
-
             // TODO: This should work for Single Player,
             // but !is_bot should be changed when implementing MultiPlayer
-            let mut opponent_state = if (game_state.player_1 == player_address) {
-                get!(world, (game_state.player_2, !is_bot), (PlayerState))
+
+            let mut opponent_state: PlayerState = if (game_state.player_1 == player_address) {
+                world.read_model((game_state.player_2, !is_bot))
             } else {
-                get!(world, (game_state.player_1, !is_bot), (PlayerState))
+                world.read_model((game_state.player_1, !is_bot))
             };
 
             let mut cipher_total_value: u8 = 0;
@@ -126,13 +125,11 @@ mod playerActions {
             // Check if game should be ended
             if (player_state.score >= constants::MAX_SCORE.into()
                 && player_state.score > opponent_state.score) {
-                let mut winner_account = get!(world, player_state.player_address, (PlayerAccount));
-                let mut loser_account = get!(world, opponent_state.player_address, (PlayerAccount));
-                let mut opponent_ciphers = get!(
-                    world, (opponent_state.player_address, !is_bot), (PlayerCiphers)
-                );
+                let mut winner_account: PlayerAccount = world.read_model(player_state.player_address);
+                let mut loser_account: PlayerAccount = world.read_model(opponent_state.player_address);
+                // TODO: should change the !is_bot when implementing multiplayer
+                let mut opponent_ciphers: PlayerCiphers = world.read_model((opponent_state.player_address, !is_bot)); 
 
-                // TODO: games_won is not incrementing for some reason
                 GameTrait::end_game(
                     ref game_state,
                     ref player_state,
@@ -146,25 +143,21 @@ mod playerActions {
                 PlayerTrait::reset_ciphers(ref player_ciphers, true, true);
                 PlayerTrait::reset_ciphers(ref opponent_ciphers, true, true);
 
-                set!(
-                    world,
-                    (
-                        game_state,
-                        player_state,
-                        opponent_state,
-                        loser_account,
-                        winner_account,
-                        player_ciphers,
-                        opponent_ciphers
-                    )
-                );
+                world.write_model(@game_state);
+                world.write_model(@player_state);
+                world.write_model(@opponent_state);
+                world.write_model(@loser_account);
+                world.write_model(@winner_account);
+                world.write_model(@player_ciphers);
+                world.write_model(@opponent_ciphers);
             } else {
                 if (cipher_total_type == CipherTypes::Attack) {
-                    set!(world, (opponent_state));
+                    world.write_model(@opponent_state);
                 }
 
                 PlayerTrait::reset_ciphers(ref player_ciphers, true, false);
-                set!(world, (player_state, player_ciphers));
+                world.write_model(@player_state);
+                world.write_model(@player_ciphers);
             }
         }
     }

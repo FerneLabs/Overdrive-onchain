@@ -1,8 +1,0 @@
-tag = "overdrive-playerActions"
-writes = [
-    "overdrive-PlayerAccount",
-    "overdrive-PlayerAssets",
-    "overdrive-PlayerState",
-    "overdrive-PlayerCiphers", 
-    "overdrive-GameState"
-]
