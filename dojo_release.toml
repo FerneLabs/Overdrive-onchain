@@ -1,19 +1,24 @@
 [world]
 name = "Overdrive"
-description = "The official Dojo Starter guide, the quickest and most streamlined way to get your Dojo Autonomous World up and running. This guide will assist you with the initial setup, from cloning the repository to deploying your world."
+description = "Fully onchain racing/strategy game."
 cover_uri = "file://assets/cover.png"
 icon_uri = "file://assets/icon.png"
-website = "https://github.com/dojoengine/dojo-starter"
+website = "https://github.com/fernelabs/overdrive-onchain"
 seed = "overdrive"
 
 [world.socials]
-x = "https://x.com/ohayo_dojo"
-discord = "https://discord.gg/FB2wR6uF"
-github = "https://github.com/dojoengine/dojo-starter"
-telegram = "https://t.me/dojoengine"
+x = "https://x.com/fernelabs"
+github = "https://github.com/fernelabs/overdrive-onchain"
 
 [namespace]
 default = "overdrive"
+
+[writers]
+"overdrive-PlayerAccount" = ["overdrive-playerActions", "overdrive-gameActions"]
+"overdrive-PlayerAssets" = ["overdrive-playerActions", "overdrive-gameActions"]
+"overdrive-PlayerState" = ["overdrive-playerActions", "overdrive-gameActions"]
+"overdrive-PlayerCiphers" = ["overdrive-playerActions", "overdrive-gameActions"]
+"overdrive-GameState" = ["overdrive-playerActions", "overdrive-gameActions"]
 
 [env]
 rpc_url = "http://localhost:5050/"

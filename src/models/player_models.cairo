@@ -1,6 +1,7 @@
 use overdrive::utils;
 use overdrive::constants;
 use starknet::{ContractAddress, get_block_timestamp};
+use dojo::model::ModelStorage;
 
 #[derive(Drop, Copy, Serde)]
 #[dojo::model]
