@@ -2,6 +2,7 @@ use overdrive::utils;
 use overdrive::constants;
 use starknet::{ContractAddress, get_block_timestamp};
 use dojo::model::ModelStorage;
+use core::ArrayTrait;
 
 #[derive(Drop, Copy, Serde)]
 #[dojo::model]
@@ -40,22 +41,15 @@ pub struct PlayerState {
     pub playing: bool
 }
 
-#[derive(Drop, Copy, Serde)]
+#[derive(Drop, Serde)]
 #[dojo::model]
 pub struct PlayerCiphers {
     #[key]
     pub player_address: ContractAddress,
     #[key]
     pub is_bot: bool,
-    pub hack_cipher_1: Cipher,
-    pub hack_cipher_2: Cipher,
-    pub hack_cipher_3: Cipher,
-
-    pub deck_cipher_1: Cipher,
-    pub deck_cipher_2: Cipher,
-    pub deck_cipher_3: Cipher,
-    pub deck_cipher_4: Cipher,
-    pub deck_cipher_5: Cipher
+    pub hack_ciphers: Array<Cipher>,
+    pub deck_ciphers: Array<Cipher>
 }
 
 #[derive(Drop, Copy, Serde, Introspect, Debug)]
@@ -85,6 +79,9 @@ impl PlayerImpl of PlayerTrait {
         PlayerState, 
         PlayerCiphers
     ) {
+        let default_cipher = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+        let hack_ciphers = array![default_cipher, default_cipher, default_cipher];
+        let deck_ciphers = array![default_cipher, default_cipher, default_cipher, default_cipher, default_cipher];
         (
             PlayerAccount {
                 player_address,
@@ -112,15 +109,8 @@ impl PlayerImpl of PlayerTrait {
             PlayerCiphers {
                 player_address,
                 is_bot,
-                hack_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                hack_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                hack_cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-
-                deck_cipher_1: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                deck_cipher_2: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                deck_cipher_3: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                deck_cipher_4: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
-                deck_cipher_5: Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 },
+                hack_ciphers,
+                deck_ciphers
             }
         )
     }
@@ -134,20 +124,18 @@ impl PlayerImpl of PlayerTrait {
         player_state.playing = false;
     }
 
-    fn reset_ciphers(ref player_ciphers: PlayerCiphers, hack: bool, deck: bool) -> () {
+    fn reset_ciphers(mut player_ciphers: PlayerCiphers, hack: bool, deck: bool) -> PlayerCiphers {
+        let default_cipher = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+
         if (hack) {
-            player_ciphers.hack_cipher_1 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.hack_cipher_2 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.hack_cipher_3 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player_ciphers.hack_ciphers = array![default_cipher, default_cipher, default_cipher];
         }
 
         if (deck) {
-            player_ciphers.deck_cipher_1 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.deck_cipher_2 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.deck_cipher_3 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.deck_cipher_4 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
-            player_ciphers.deck_cipher_5 = Cipher { cipher_type: CipherTypes::Unknown, cipher_value: 0 };
+            player_ciphers.deck_ciphers = array![default_cipher, default_cipher, default_cipher, default_cipher, default_cipher];
         }
+
+        player_ciphers
     }
     
     // TODO: use appropiate types instead of u256
@@ -185,9 +173,12 @@ impl PlayerImpl of PlayerTrait {
         let current_time = get_block_timestamp();
         let time_since_action: u64 = current_time - player_state.last_action_time;
     
-        let energy_regenerated: u64 = time_since_action / constants::REGEN_EVERY.into();
-        let reminder_seconds: u64 = time_since_action % constants::REGEN_EVERY.into();
-    
+        let mut energy_regenerated: u64 = time_since_action / constants::REGEN_EVERY.into();
+        let mut reminder_seconds: u64 = time_since_action % constants::REGEN_EVERY.into();
+        
+        // Set as 10 max to avoid unwrap error in case the time since action is too large
+        if (energy_regenerated > 10) { energy_regenerated = 10; }
+        
         println!("energy regenerated: {:?}", energy_regenerated);
         player_state.energy = if (player_state.energy + energy_regenerated.try_into().unwrap() > 10) {
             10
