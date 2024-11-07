@@ -71,12 +71,12 @@ mod playerActions {
                 );
 
                 // Generate 6 pseudo-random numbers using different hash inputs
-                let type_1_hash: u256 = utils::hash2(seed, 1).into();
-                let type_2_hash: u256 = utils::hash2(seed, 2).into();
-                let type_3_hash: u256 = utils::hash2(seed, 3).into();
-                let value_1_hash: u256 = utils::hash2(seed, 4).into();
-                let value_2_hash: u256 = utils::hash2(seed, 5).into();
-                let value_3_hash: u256 = utils::hash2(seed, 6).into();
+                let type_1_hash = utils::hash2(seed, 1);
+                let type_2_hash = utils::hash2(seed, 2);
+                let type_3_hash = utils::hash2(seed, 3);
+                let value_1_hash = utils::hash2(seed, 4);
+                let value_2_hash = utils::hash2(seed, 5);
+                let value_3_hash = utils::hash2(seed, 6);
 
                 println!("Running cipher gen");
                 let mut hacked_ciphers = ArrayTrait::<Cipher>::new();

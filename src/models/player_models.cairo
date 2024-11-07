@@ -139,15 +139,15 @@ impl PlayerImpl of PlayerTrait {
     }
     
     // TODO: use appropiate types instead of u256
-    fn gen_cipher(value_hash: u256, type_hash: u256) -> Cipher {
-        let type_weights = [40_u256, 25_u256, 20_u256, 15_u256].span(); // ADV, ATT, SHI, ENE
+    fn gen_cipher(value_hash: felt252, type_hash: felt252) -> Cipher {
+        let type_weights = [40_u8, 25_u8, 20_u8, 15_u8].span(); // ADV, ATT, SHI, ENE
         let weights_sum: u256 = 100;
 
-        let mut type_in_range = utils::get_range(type_hash, 0, weights_sum);
-        let mut type_index: u256 = 3;
-        let mut value: u256 = 0;
+        let mut type_in_range = utils::get_range(type_hash.into(), 0, weights_sum);
+        let mut type_index: u8 = 3;
+        let mut value: u8 = 0;
 
-        let mut i: u256 = 0;
+        let mut i: u8 = 0;
         for curr_type in type_weights {
             if (type_in_range < *curr_type) {
                 type_index = i;
@@ -158,14 +158,14 @@ impl PlayerImpl of PlayerTrait {
         };
 
         if (type_index == 0) {
-            value = utils::get_range(value_hash, 5, 10);
+            value = utils::get_range(value_hash.into(), 5, 10);
         } else {
-            value = utils::get_range(value_hash, 1, 5);
+            value = utils::get_range(value_hash.into(), 1, 5);
         }
 
         Cipher {
-            cipher_type: utils::parse_cipher_type(type_index.try_into().unwrap()),
-            cipher_value: value.try_into().unwrap(),
+            cipher_type: utils::parse_cipher_type(type_index),
+            cipher_value: value,
         }
     }
 
