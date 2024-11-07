@@ -22,7 +22,7 @@ pub fn hash4(val_1: felt252, val_2: felt252, val_3: felt252, val_4: felt252) -> 
     hash.finalize()
 }
 
-pub fn get_range(value: u256, min: u256, max: u256) -> u8 {
+pub fn get_number_between(value: u256, min: u256, max: u256) -> u8 {
     (min + (value % (max - min + 1))).try_into().unwrap()
 }
 
