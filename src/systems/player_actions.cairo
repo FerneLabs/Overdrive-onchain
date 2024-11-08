@@ -121,10 +121,12 @@ mod playerActions {
             let mut cipher_total_type = CipherTypes::Unknown;
 
             PlayerTrait::calc_energy_regen(ref player_state);
+            PlayerTrait::validate_ciphers(ciphers.clone(), player_ciphers.clone());
             PlayerTrait::calc_cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
             PlayerTrait::handle_cipher_action(
                 ref player_state, ref opponent_state, ref cipher_total_type, ref cipher_total_value
             );
+
 
             // Check if game should be ended
             if (player_state.score >= constants::MAX_SCORE.into()

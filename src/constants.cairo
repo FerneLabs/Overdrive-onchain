@@ -7,6 +7,7 @@ pub const USERNAME_NOT_FOUND: felt252 = 'player with username not found';
 pub const USERNAME_EXIST: felt252 = 'username already exist';
 pub const ONLY_OWNER_USERNAME: felt252 = 'only user can update username';
 pub const UNKNOWN_CIPHER_TYPE: felt252 = 'cipher type is not valid';
+pub const CIPHER_NOT_OWNED: felt252 = 'cipher is not present in player';
 
 /////////////////////////////////////////////////////////////////////////////////
 /// GAMEPLAY VALUES                                                           ///

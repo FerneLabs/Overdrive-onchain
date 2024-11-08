@@ -41,7 +41,7 @@ pub struct PlayerState {
     pub playing: bool
 }
 
-#[derive(Drop, Serde)]
+#[derive(Drop, Serde, Clone)]
 #[dojo::model]
 pub struct PlayerCiphers {
     #[key]
@@ -52,7 +52,7 @@ pub struct PlayerCiphers {
     pub deck_ciphers: Array<Cipher>
 }
 
-#[derive(Drop, Clone, Serde, Introspect, Debug)]
+#[derive(Drop, Clone, Serde, Introspect, Debug, PartialEq)]
 pub struct Cipher {
     pub cipher_types: Array<CipherTypes>,
     pub cipher_value: u8,
@@ -279,5 +279,26 @@ impl PlayerImpl of PlayerTrait {
             CipherTypes::Energy => { player_state.energy += cipher_total_value; },
             _ => { assert(cipher_total_type == CipherTypes::Unknown, constants::UNKNOWN_CIPHER_TYPE); },
         }
+    }
+
+    fn validate_ciphers(module_ciphers: Array<Cipher>, player_ciphers: PlayerCiphers) -> () {
+        let mut validated: usize = 0;
+        
+        for mod_cipher in module_ciphers.span() {
+            for hack_cipher in player_ciphers.hack_ciphers.span() {
+                if (mod_cipher == hack_cipher) {
+                    validated += 1;
+                    break;
+                }
+            };
+            for deck_cipher in player_ciphers.deck_ciphers.span() {
+                if (mod_cipher == deck_cipher) {
+                    validated += 1;
+                    break;
+                }
+            };
+        };
+        
+        assert(validated >= module_ciphers.len(), constants::CIPHER_NOT_OWNED);
     }
 }
