@@ -175,29 +175,70 @@
 </details>
 
 ### Interact with world
+
+#### See all methods
 ```bash
-# See all methods
 ./run help
+```
 
-# Build
+#### Build
+```bash
 ./run build
+```
 
-# Create account
+#### Create account
+```bash
 ./run create USERNAME
+```
 
-# Create new game. GAME_MODE = 0 (SP) || 1 (MP) 
+#### Create new game `GAME_MODE = 0 (SP) || 1 (MP)`
+```bash
 ./run init GAME_MODE
+```
 
-# Request ciphers for caller address. IS_BOT = 0 || 1
-./run request IS_BOT
-
-# Runs module with cipher values sent
-./run module PARAMS
+#### Request ciphers for caller address. IS_BOT = 0 || 1. For empty deck send `int:0,IS_BOT`
+```bash
+./run request DECK_ARRAY,IS_BOT
   # Example usage:
-  ./run module int:3,0,10,0,10,0,10,0
+  ./run request int:2,int:1,3,5,int:1,3,1,0
   # Where: 
-    # int:3 -> Length of array
-    # 0,10 -> cipher_type,cipher_value
+      # int:2 -> Length of module array
+        # int:1 -> Length of Type array
+        # 3 -> Type indexes, in this case, single energy cipher
+        # 5 -> cipher_value
+        ###
+        # int:1 -> Length of Type array
+        # 3 -> Type indexes, in this case, single energy cipher
+        # 1 -> cipher_value
+      # 0 -> is_bot = false
+```
+
+#### Runs module with cipher values sent. For empty deck send `int:0,IS_BOT`
+```bash
+./run module MODULE_ARRAY,DECK_ARRAY,IS_BOT
+  # Example usage:
+  ./run module int:2,int:2,0,0,15,int:2,0,0,20,int:3,int:1,2,5,int:1,3,2,int:1,3,1,0
+
+  # Where: 
+    # int:2 -> Length of module array
+      # int:2 -> Length of Type array
+      # 0,0 -> Type indexes, in this case, pure ADV cipher
+      # 15 -> cipher_value
+      ###
+      # int:3 -> Length of Type array
+      # 0,0 -> Type indexes, in this case, pure ADV cipher
+      # 20 -> cipher_value
+    # int:3 -> Length of deck array
+      # int:1 -> Length of Type array
+      # 2 -> Type indexes, in this case, single shield cipher 
+      # 5 -> cipher_value
+      ###
+      # int:1 -> Length of Type array
+      # 3 -> Type indexes, in this case, single energy cipher 
+      # 2 -> cipher_value
+      ##
+      # int:1 -> Length of Type array
+      # 3 -> Type indexes, in this case, single energy cipher 
+      # 1 -> cipher_value
     # 0 -> is_bot = false
-  
 ```
