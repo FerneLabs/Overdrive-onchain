@@ -9,8 +9,8 @@ use starknet::{ContractAddress};
 #[starknet::interface]
 trait IPlayerActions<T> {
     fn create_player(ref self: T, username: felt252);
-    fn hack_ciphers(ref self: T, is_bot: bool);
-    fn run_cipher_module(ref self: T, ciphers: Array<Cipher>, is_bot: bool);
+    fn hack_ciphers(ref self: T, deck: Array<Cipher>, is_bot: bool);
+    fn run_cipher_module(ref self: T, module: Array<Cipher>, deck: Array<Cipher>, is_bot: bool);
 }
 
 #[dojo::contract]
@@ -46,7 +46,7 @@ mod playerActions {
             world.write_model(@bot_ciphers);
         }
 
-        fn hack_ciphers(ref self: ContractState, is_bot: bool) {
+        fn hack_ciphers(ref self: ContractState, deck: Array<Cipher>, is_bot: bool) {
             let player_address = get_caller_address();
 
             let mut world = self.world(@"overdrive");
@@ -84,6 +84,13 @@ mod playerActions {
                 hacked_ciphers.append(PlayerTrait::gen_cipher(type_2_hash, value_2_hash));
                 hacked_ciphers.append(PlayerTrait::gen_cipher(type_3_hash, value_3_hash));
 
+                // Validate and update deck before overwritting hack_ciphers
+                PlayerTrait::validate_ciphers(
+                    deck.clone(), 
+                    player_ciphers.deck_ciphers.clone(), 
+                    player_ciphers.hack_ciphers.clone()
+                );
+                player_ciphers.deck_ciphers = deck;
                 player_ciphers.hack_ciphers = hacked_ciphers;
 
                 player_state.energy -= 4;
@@ -92,8 +99,8 @@ mod playerActions {
             }
         }
 
-        fn run_cipher_module(ref self: ContractState, ciphers: Array<Cipher>, is_bot: bool) {
-            if (ciphers.len() < 2) {
+        fn run_cipher_module(ref self: ContractState, module: Array<Cipher>, deck: Array<Cipher>, is_bot: bool) {
+            if (module.len() < 2) {
                 return;
             }
 
@@ -121,8 +128,19 @@ mod playerActions {
             let mut cipher_total_type = CipherTypes::Unknown;
 
             PlayerTrait::calc_energy_regen(ref player_state);
-            PlayerTrait::validate_ciphers(ciphers.clone(), player_ciphers.clone());
-            PlayerTrait::calc_cipher_stats(ciphers, ref cipher_total_type, ref cipher_total_value);
+            // Validate ciphers sent in deck. Compare to player_ciphers
+            PlayerTrait::validate_ciphers(
+                deck.clone(), 
+                player_ciphers.deck_ciphers.clone(), 
+                player_ciphers.hack_ciphers.clone()
+            );
+            // Validate ciphers sent in module. Compare to validated deck and player_ciphers.hack_ciphers
+            PlayerTrait::validate_ciphers(
+                module.clone(), 
+                deck.clone(),
+                player_ciphers.hack_ciphers.clone()
+            );
+            PlayerTrait::calc_cipher_stats(module, ref cipher_total_type, ref cipher_total_value);
             PlayerTrait::handle_cipher_action(
                 ref player_state, ref opponent_state, ref cipher_total_type, ref cipher_total_value
             );
@@ -161,7 +179,8 @@ mod playerActions {
                     world.write_model(@opponent_state);
                 }
 
-                let player_ciphers = PlayerTrait::reset_ciphers(player_ciphers, true, false);
+                let mut player_ciphers = PlayerTrait::reset_ciphers(player_ciphers, true, false);
+                player_ciphers.deck_ciphers = deck; // Assign validated deck into player_ciphers
                 world.write_model(@player_state);
                 world.write_model(@player_ciphers);
             }

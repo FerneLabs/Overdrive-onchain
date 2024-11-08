@@ -281,17 +281,21 @@ impl PlayerImpl of PlayerTrait {
         }
     }
 
-    fn validate_ciphers(module_ciphers: Array<Cipher>, player_ciphers: PlayerCiphers) -> () {
+    fn validate_ciphers(
+        module_ciphers: Array<Cipher>, 
+        deck_ciphers: Array<Cipher>, 
+        hack_ciphers: Array<Cipher>
+    ) -> () {
         let mut validated: usize = 0;
         
         for mod_cipher in module_ciphers.span() {
-            for hack_cipher in player_ciphers.hack_ciphers.span() {
+            for hack_cipher in hack_ciphers.span() {
                 if (mod_cipher == hack_cipher) {
                     validated += 1;
                     break;
                 }
             };
-            for deck_cipher in player_ciphers.deck_ciphers.span() {
+            for deck_cipher in deck_ciphers.span() {
                 if (mod_cipher == deck_cipher) {
                     validated += 1;
                     break;
