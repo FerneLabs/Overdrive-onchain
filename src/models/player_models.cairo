@@ -121,14 +121,12 @@ impl PlayerImpl of PlayerTrait {
         let default_cipher = Cipher { cipher_types: default_cipher_types, cipher_value: 0 };
 
         if (hack) {
-            player_ciphers
-                .hack_ciphers =
+            player_ciphers.hack_ciphers =
                     array![default_cipher.clone(), default_cipher.clone(), default_cipher.clone()];
         }
 
         if (deck) {
-            player_ciphers
-                .deck_ciphers =
+            player_ciphers.deck_ciphers =
                     array![
                         default_cipher.clone(),
                         default_cipher.clone(),
@@ -276,13 +274,14 @@ impl PlayerImpl of PlayerTrait {
         let mut energy_count : u8 = 0;
 
         // Step 1: Count occurrences of each type and accumulate total value
-        for cipher in ciphers {
-            for cipher_type in cipher.cipher_types {
+        for cipher in ciphers.span() {
+            for cipher_type in cipher.cipher_types.span() {
                 match cipher_type {
                     CipherTypes::Advance => { advance_count += 1; },
                     CipherTypes::Attack => { attack_count += 1; },
                     CipherTypes::Energy => { energy_count += 1;},
                     CipherTypes::Shield => { shield_count += 1; },
+                    CipherTypes::Unknown => { break; },
                 }
             }
         };
@@ -293,13 +292,13 @@ impl PlayerImpl of PlayerTrait {
 
         let mut type_count_index = 0;
         let mut is_combo = false;
-        while type_count_index < type_count.len().into() {
-            if *type_count[type_count_index] == 3 {
+        while type_count.len() > type_count_index.into() {
+            if *type_count.at(type_count_index.into()) == 3 {
                 // Max combo: 3 of the same type, double the total value
                 max_type = utils::parse_cipher_type(type_count_index);
                 is_combo = true;
                 break;
-            } else if *type_count[type_count_index] == 2 {
+            } else if *type_count.at(type_count_index.into()) == 2 {
                 // Pair match: 2 of the same type
                 max_type = utils::parse_cipher_type(type_count_index);
                 break;
@@ -310,10 +309,10 @@ impl PlayerImpl of PlayerTrait {
 
         let mut total_value = 0;
 
-        for cipher in ciphers {
-            for cipher_type in cipher.cipher_types {
-                if cipher_type == max_type {
-                    total_value += cipher.cipher_value;
+        for cipher in ciphers.span() {
+            for cipher_type in cipher.cipher_types.span() {
+                if *cipher_type == max_type {
+                    total_value += *cipher.cipher_value;
                 }
             }
         };
