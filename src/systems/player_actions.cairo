@@ -99,6 +99,7 @@ mod playerActions {
             }
         }
 
+        // TODO: need to rework this to handle multiplayer or create new function specifically for mp
         fn run_cipher_module(ref self: ContractState, module: Array<Cipher>, deck: Array<Cipher>, is_bot: bool) {
             if (module.len() < 2) {
                 return;

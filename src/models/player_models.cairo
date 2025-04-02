@@ -49,6 +49,8 @@ pub struct PlayerCiphers {
     #[key]
     pub is_bot: bool,
     pub hack_ciphers: Array<Cipher>,
+    // deck_ciphers includes ciphers in the deck and the run system module
+    // (ciphers ready to be run, but not yet sent)
     pub deck_ciphers: Array<Cipher>
 }
 
@@ -77,6 +79,7 @@ impl PlayerImpl of PlayerTrait {
         let hack_ciphers = array![
             default_cipher.clone(), default_cipher.clone(), default_cipher.clone()
         ];
+        // TODO : add 3 more items for system module
         let deck_ciphers = array![
             default_cipher.clone(),
             default_cipher.clone(),
@@ -116,6 +119,7 @@ impl PlayerImpl of PlayerTrait {
         player_state.playing = false;
     }
 
+    // TODO : add unit test
     fn reset_ciphers(mut player_ciphers: PlayerCiphers, hack: bool, deck: bool) -> PlayerCiphers {
         let default_cipher_types = array![CipherTypes::Unknown];
         let default_cipher = Cipher { cipher_types: default_cipher_types, cipher_value: 0 };
@@ -125,6 +129,7 @@ impl PlayerImpl of PlayerTrait {
                     array![default_cipher.clone(), default_cipher.clone(), default_cipher.clone()];
         }
 
+        // TODO : add 3 more items for system module
         if (deck) {
             player_ciphers.deck_ciphers =
                     array![
@@ -239,6 +244,7 @@ impl PlayerImpl of PlayerTrait {
         Cipher { cipher_types, cipher_value }
     }
 
+    // TODO : add unit test
     fn calc_energy_regen(ref player_state: PlayerState) -> () {
         let current_time = get_block_timestamp();
         let time_since_action: u64 = current_time - player_state.last_action_time;
@@ -263,6 +269,7 @@ impl PlayerImpl of PlayerTrait {
         player_state.last_action_time = current_time - reminder_seconds;
     }
 
+    // TODO : add unit test
     fn calc_cipher_stats(
         ciphers: Array<Cipher>, ref cipher_total_type: CipherTypes, ref cipher_total_value: u8
     ) -> () {
@@ -325,6 +332,7 @@ impl PlayerImpl of PlayerTrait {
         cipher_total_value = total_value;
     }
 
+    // TODO : add unit test
     fn handle_cipher_action(
         ref player_state: PlayerState,
         ref opponent_state: PlayerState,
@@ -357,6 +365,7 @@ impl PlayerImpl of PlayerTrait {
         }
     }
 
+    // TODO : add unit test
     fn validate_ciphers(
         module_ciphers: Array<Cipher>, deck_ciphers: Array<Cipher>, hack_ciphers: Array<Cipher>
     ) -> () {
